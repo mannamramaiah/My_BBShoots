@@ -60,9 +60,11 @@ The system is built with a dark cinematic theme, custom cursor effects, and full
    git clone https://github.com/yourusername/my_bbshoots.git
    cd my_bbshoots
    
-   📁 Project Structure
+   
 
-   htdocs/
+
+📁 Project Structure
+ htdocs/
 ├── index.html          ← main website
 ├── admin/
 │   └── index.html      ← admin panel
