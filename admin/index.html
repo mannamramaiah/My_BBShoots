@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBShoots — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════ ROOT ═══════════════════════════ */
+:root{
+  --red:#dc2626;--red-dark:#b91c1c;--red-dim:rgba(220,38,38,.10);
+  --bg:#080b10;--bg2:#0d1117;--bg3:#111827;--card:#0f1923;--card2:#141e2d;
+  --border:#1a2744;--border2:#243357;
+  --text:#f0f4ff;--muted:#4a5a7a;--light:#8899bb;
+  --gold:#f59e0b;--green:#10b981;--purple:#8b5cf6;
+  --blue:#3b82f6;--orange:#f97316;--cyan:#06b6d4;
+  --fd:'Bebas Neue',sans-serif;--fb:'Outfit',sans-serif;
+}
+
+/* ═══════════════════════════ BASE ═══════════════════════════ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh;overflow-x:hidden}
+::selection{background:var(--red);color:#fff}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--red);border-radius:2px}
+button,select,input,textarea,a{cursor:pointer;font-family:var(--fb)}
+
+/* ═══════════════════════════ CURSOR ═══════════════════════════ */
+#cur-dot{position:fixed;width:8px;height:8px;background:var(--red);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);box-shadow:0 0 10px var(--red),0 0 22px rgba(220,38,38,.35);transition:background .15s,transform .1s}
+#cur-ring{position:fixed;width:34px;height:34px;border:1.5px solid rgba(220,38,38,.55);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width .22s,height .22s,border-color .22s,opacity .22s}
+#cur-trail{position:fixed;width:5px;height:5px;background:rgba(220,38,38,.28);border-radius:50%;pointer-events:none;z-index:99997;transform:translate(-50%,-50%)}
+body.c-hover #cur-ring{width:52px;height:52px;border-color:var(--red)}
+body.c-hover #cur-dot{background:#fff;transform:translate(-50%,-50%) scale(1.3)}
+body.c-click #cur-dot{transform:translate(-50%,-50%) scale(.45);background:#fff}
+
+/* ═══════════════════════════ ANIMATIONS ═══════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes toastIn{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
+@keyframes scan{0%{transform:translateY(-5%)}100%{transform:translateY(110vh)}}
+
+/* ═══════════════════════════ LOGIN ═══════════════════════════ */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;position:relative;overflow:hidden}
+.lg-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(220,38,38,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(220,38,38,.04) 1px,transparent 1px);background-size:50px 50px}
+.lg-glow{position:absolute;top:-15%;left:50%;transform:translateX(-50%);width:680px;height:480px;pointer-events:none;background:radial-gradient(ellipse,rgba(220,38,38,.12) 0%,transparent 65%)}
+.scan-line{position:absolute;left:0;right:0;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(220,38,38,.5),transparent);animation:scan 3.5s linear infinite;z-index:2}
+.login-box{background:rgba(12,18,28,.97);border:1px solid var(--border);border-radius:20px;padding:44px;width:100%;max-width:400px;position:relative;z-index:3;animation:fadeUp .55s ease;overflow:hidden;backdrop-filter:blur(18px)}
+.lc{position:absolute;width:14px;height:14px;border-color:var(--red);border-style:solid;opacity:.65}
+.lc.tl{top:10px;left:10px;border-width:2px 0 0 2px}
+.lc.tr{top:10px;right:10px;border-width:2px 2px 0 0}
+.lc.bl{bottom:10px;left:10px;border-width:0 0 2px 2px}
+.lc.br{bottom:10px;right:10px;border-width:0 2px 2px 0}
+.ll{font-family:var(--fd);font-size:28px;letter-spacing:4px;margin-bottom:2px}
+.ll span{color:var(--red)}
+.lt{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:26px}
+.lb{display:inline-flex;align-items:center;gap:6px;background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.22);color:var(--red);padding:5px 14px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px}
+.lb::before{content:'';width:6px;height:6px;background:var(--red);border-radius:50%;animation:pulse 1.5s infinite}
+hr.d{border:none;border-top:1px solid var(--border);margin:18px 0}
+
+/* ═══════════════════════════ FORMS ═══════════════════════════ */
+.fg{margin-bottom:14px}
+label{display:block;font-size:10px;color:var(--muted);margin-bottom:5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+input,select,textarea{background:rgba(255,255,255,.04);border:1.5px solid var(--border);color:var(--text);padding:10px 13px;border-radius:8px;font-size:14px;width:100%;outline:none;transition:border-color .2s,background .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--red);background:rgba(220,38,38,.04);box-shadow:0 0 0 3px rgba(220,38,38,.07)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+select option{background:var(--bg2)}
+
+/* ═══════════════════════════ BUTTONS ═══════════════════════════ */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:8px;border:none;font-weight:600;font-size:14px;transition:all .2s;white-space:nowrap;text-decoration:none}
+.btn:disabled{opacity:.4;pointer-events:none}
+.btn-red{background:linear-gradient(135deg,var(--red),var(--red-dark));color:#fff;box-shadow:0 3px 14px rgba(220,38,38,.28)}
+.btn-red:hover{transform:translateY(-1px);box-shadow:0 7px 24px rgba(220,38,38,.42)}
+.btn-out{background:transparent;color:var(--text);border:1.5px solid var(--border)}
+.btn-out:hover{border-color:rgba(220,38,38,.5);color:var(--red)}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--light);border:1px solid var(--border)}
+.btn-ghost:hover{background:rgba(255,255,255,.09);color:var(--text)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-full{width:100%;justify-content:center}
+
+/* ═══════════════════════════ SHELL ═══════════════════════════ */
+.shell{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:232px;flex-shrink:0;background:linear-gradient(180deg,rgba(12,18,28,.99),rgba(8,11,16,.99));border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:300}
+.sid-top{padding:20px 16px;border-bottom:1px solid var(--border);position:relative}
+.sid-top::after{content:'';position:absolute;bottom:0;left:16px;right:16px;height:1px;background:linear-gradient(90deg,transparent,var(--red),transparent)}
+.sid-logo{font-family:var(--fd);font-size:21px;letter-spacing:4px}
+.sid-logo span{color:var(--red)}
+.sid-sub{font-size:9px;color:var(--muted);letter-spacing:2.5px;text-transform:uppercase;margin-top:1px}
+.sid-body{flex:1;overflow-y:auto;padding:10px 0}
+.ng{padding:13px 16px 4px}
+.ng-l{font-size:9px;color:rgba(74,90,122,.65);letter-spacing:2px;text-transform:uppercase;font-weight:600}
+.snav{display:flex;align-items:center;gap:10px;padding:10px 15px;margin:2px 7px;border:none;background:none;color:var(--muted);font-size:13px;border-radius:8px;width:calc(100% - 14px);text-align:left;transition:all .18s;position:relative}
+.snav:hover{background:rgba(220,38,38,.06);color:var(--light)}
+.snav.on{background:rgba(220,38,38,.11);color:var(--red);font-weight:600}
+.snav.on::before{content:'';position:absolute;left:-7px;top:50%;transform:translateY(-50%);width:3px;height:58%;background:linear-gradient(var(--red),var(--red-dark));border-radius:2px}
+.si{width:18px;text-align:center;font-size:14px}
+.nbadge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;animation:pulse 2s infinite}
+.sid-foot{padding:13px;border-top:1px solid var(--border)}
+.adm-pill{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:9px;padding:9px 11px;margin-bottom:9px}
+.adm-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red-dark));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;box-shadow:0 0 10px rgba(220,38,38,.28)}
+.adm-name{font-size:13px;font-weight:600}
+.adm-role{font-size:10px;color:var(--muted)}
+
+/* MAIN */
+.main{margin-left:232px;flex:1;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:200;background:rgba(8,11,16,.96);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(220,38,38,.35),transparent)}
+.pg-title{font-family:var(--fd);font-size:25px;letter-spacing:2px}
+.pg-title span{color:var(--red)}
+.pg-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.topbar-r{display:flex;gap:8px}
+.content{padding:22px 24px;flex:1}
+
+/* PANELS */
+.panel{display:none}
+.panel.on{display:block;animation:fadeUp .32s ease}
+
+/* ═══════════════════════════ STAT CARDS ═══════════════════════════ */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:11px;margin-bottom:20px}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;transition:all .22s;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(220,38,38,.05),transparent);opacity:0;transition:opacity .22s}
+.sc:hover{border-color:rgba(220,38,38,.28);transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.38)}
+.sc:hover::before{opacity:1}
+.sc-i{font-size:18px;margin-bottom:8px}
+.sc-n{font-family:var(--fd);font-size:40px;line-height:1;margin-bottom:1px}
+.sc-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+
+/* ═══════════════════════════ TOOLBAR ═══════════════════════════ */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:13px}
+.srch{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.03);border:1.5px solid var(--border);border-radius:8px;padding:0 12px;flex:1;min-width:200px;max-width:340px;transition:border-color .2s}
+.srch:focus-within{border-color:rgba(220,38,38,.45)}
+.srch input{background:none;border:none;padding:8px 0;font-size:13px;width:100%;outline:none;box-shadow:none}
+.fbtns{display:flex;gap:4px;flex-wrap:wrap}
+.fb{padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:none;color:var(--muted);font-size:11px;font-weight:600;transition:all .18s;letter-spacing:.5px;text-transform:uppercase}
+.fb:hover{border-color:rgba(220,38,38,.4);color:var(--red)}
+.fb.on{background:rgba(220,38,38,.1);border-color:var(--red);color:var(--red)}
+
+/* ═══════════════════════════ TABLE ═══════════════════════════ */
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden;overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;min-width:1000px}
+.tbl thead th{background:rgba(255,255,255,.02);padding:11px 13px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;border-bottom:1px solid var(--border);white-space:nowrap;transition:color .18s}
+.tbl thead th.sortable{cursor:pointer}
+.tbl thead th.sortable:hover{color:var(--light)}
+.tbl thead th.sa::after{content:' ▲';color:var(--red);font-size:8px}
+.tbl thead th.sd::after{content:' ▼';color:var(--red);font-size:8px}
+.tbl tbody td{padding:12px 13px;border-bottom:1px solid rgba(26,39,68,.38);font-size:13px;vertical-align:middle}
+.tbl tbody tr:last-child td{border-bottom:none}
+.tbl tbody tr{transition:background .13s}
+.tbl tbody tr:hover td{background:rgba(220,38,38,.022)}
+.cn{font-weight:600;font-size:14px}
+.cs{color:var(--muted);font-size:11px;margin-top:2px}
+
+/* INLINE SELECT */
+.isel{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:7px;font-size:12px;transition:border-color .18s,background .18s;outline:none;min-width:118px}
+.isel:focus{border-color:var(--red);background:rgba(220,38,38,.04)}
+.isel option{background:var(--bg2)}
+
+/* STAGE BUTTONS (new) */
+.stage-btns{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.stage-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s}
+.stage-btn.active{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 0 8px rgba(220,38,38,.5)}
+.stage-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* ACTION BUTTONS */
+.ab{padding:5px 9px;border-radius:6px;border:none;font-size:11px;font-weight:600;transition:all .17s;display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.ab:hover{transform:translateY(-1px)}
+.a-red{background:rgba(220,38,38,.12);color:#f87171;border:1px solid rgba(220,38,38,.28)}
+.a-grn{background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.28)}
+.a-gld{background:rgba(245,158,11,.1);color:var(--gold);border:1px solid rgba(245,158,11,.28)}
+.a-mut{background:rgba(74,90,122,.1);color:var(--muted);border:1px solid rgba(74,90,122,.28)}
+.a-blu{background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.28)}
+.a-ora{background:rgba(249,115,22,.1);color:var(--orange);border:1px solid rgba(249,115,22,.28)}
+.ab-wrap{display:flex;gap:4px;flex-wrap:wrap}
+
+/* ═══════════════════════════ BADGES ═══════════════════════════ */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:14px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
+.badge::before{content:'•';font-size:11px}
+.b-pending  {background:rgba(245,158,11,.1); color:var(--gold);  border:1px solid rgba(245,158,11,.28)}
+.b-accepted,.b-confirmed{background:rgba(16,185,129,.08);color:#34d399;border:1px solid rgba(16,185,129,.28)}
+.b-completed{background:rgba(139,92,246,.08);color:#a78bfa; border:1px solid rgba(139,92,246,.28)}
+.b-cancelled,.b-rejected{background:rgba(248,113,113,.08);color:#f87171;border:1px solid rgba(248,113,113,.28)}
+.b-shooting {background:rgba(249,115,22,.08); color:var(--orange);border:1px solid rgba(249,115,22,.28)}
+.b-editing  {background:rgba(139,92,246,.08); color:#c084fc;     border:1px solid rgba(192,132,252,.28)}
+.b-reviewing{background:rgba(6,182,212,.08);  color:var(--cyan);  border:1px solid rgba(6,182,212,.28)}
+.b-active   {background:rgba(16,185,129,.08); color:#34d399;     border:1px solid rgba(16,185,129,.28)}
+.b-suspended{background:rgba(245,158,11,.08); color:var(--gold);  border:1px solid rgba(245,158,11,.28)}
+.b-removed  {background:rgba(248,113,113,.08);color:#f87171;     border:1px solid rgba(248,113,113,.28)}
+
+/* ═══════════════════════════ PROGRESS BAR ═══════════════════════════ */
+.prog-bar{background:rgba(255,255,255,.05);border-radius:4px;height:5px;overflow:hidden;margin-top:6px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--red-dark));border-radius:4px;transition:width .55s ease}
+
+/* ═══════════════════════════ MODAL ═══════════════════════════ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(9px);z-index:800;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:linear-gradient(155deg,var(--card),var(--bg2));border:1px solid var(--border);border-radius:18px;padding:30px;width:100%;max-width:580px;animation:fadeUp .28s ease;max-height:90vh;overflow-y:auto;position:relative}
+.modal::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(220,38,38,.45),transparent)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-title{font-family:var(--fd);font-size:23px;letter-spacing:1px}
+.modal-title span{color:var(--red)}
+.mx{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);font-size:15px;padding:5px 10px;border-radius:7px;line-height:1;transition:all .18s}
+.mx:hover{background:rgba(220,38,38,.1);border-color:rgba(220,38,38,.3);color:var(--red)}
+
+/* Edit sections */
+.es{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:9px;padding:16px;margin-bottom:13px}
+.es-t{font-size:10px;color:var(--red);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.es-t::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(220,38,38,.3),transparent)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+@media(max-width:520px){.g2{grid-template-columns:1fr}}
+
+/* Detail rows */
+.dr{display:flex;gap:9px;padding:7px 0;border-bottom:1px solid rgba(26,39,68,.38)}
+.dr:last-child{border-bottom:none}
+.dl{color:var(--muted);font-size:10px;width:115px;flex-shrink:0;text-transform:uppercase;letter-spacing:.5px;padding-top:2px}
+.dv{color:var(--text);font-size:13px;word-break:break-word}
+
+/* Video rows */
+.vr{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:7px;padding:8px 11px;margin-bottom:5px;transition:border-color .18s}
+.vr:hover{border-color:rgba(220,38,38,.3)}
+.vr-t{flex:1;font-size:12px;color:var(--light);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vdel{background:none;border:none;color:var(--muted);font-size:14px;padding:2px 5px;transition:color .18s}
+.vdel:hover{color:var(--red)}
+
+/* Notif items */
+.ni{display:flex;gap:11px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:13px;margin-bottom:7px;transition:border-color .18s}
+.ni:hover{border-color:rgba(220,38,38,.22)}
+.ni.unread{border-left:3px solid var(--red)}
+.ni-ico{font-size:19px;flex-shrink:0}
+.ni-msg{font-size:13px;color:var(--light);line-height:1.5}
+.ni-t{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* Info card */
+.icard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:19px}
+.icard-t{font-weight:700;font-size:14px;margin-bottom:13px;display:flex;align-items:center;gap:7px}
+
+/* ═══════════════════════════ TOAST ═══════════════════════════ */
+#toasts{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{background:rgba(12,18,28,.97);border:1px solid var(--border);border-radius:9px;padding:11px 16px;font-size:13px;max-width:285px;display:flex;align-items:center;gap:8px;box-shadow:0 7px 28px rgba(0,0,0,.55);animation:toastIn .25s ease;pointer-events:auto;backdrop-filter:blur(14px)}
+.t-ok  {border-left:3px solid var(--green)}
+.t-err {border-left:3px solid var(--red)}
+.t-info{border-left:3px solid var(--blue)}
+.t-warn{border-left:3px solid var(--gold)}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{margin-left:0}
+  .content{padding:14px}
+  .stat-row{grid-template-columns:1fr 1fr}
+  #cur-dot,#cur-ring,#cur-trail{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cur-dot"></div>
+<div id="cur-ring"></div>
+<div id="cur-trail"></div>
+<div id="toasts"></div>
+
+<!-- ═══════════════════════════════════════
+     LOGIN PAGE
+═══════════════════════════════════════ -->
+<div id="loginPage" class="login-wrap">
+  <div class="lg-grid"></div>
+  <div class="lg-glow"></div>
+  <div class="scan-line"></div>
+  <div class="login-box">
+    <div class="lc tl"></div><div class="lc tr"></div>
+    <div class="lc bl"></div><div class="lc br"></div>
+    <div class="ll">BB<span>SHOOTS</span></div>
+    <div class="lt">Admin Control Center</div>
+    <div class="lb">🔐 Restricted Access</div>
+    <div class="fg">
+      <label>Admin Email</label>
+      <input type="email" id="aEmail" value="bbshoots49@gmail.com" placeholder="admin@email.com">
+    </div>
+    <div class="fg">
+      <label>Password</label>
+      <input type="password" id="aPass" placeholder="••••••••">
+    </div>
+    <button class="btn btn-red btn-full" id="loginBtn" onclick="doLogin()">Access Admin Panel →</button>
+    <hr class="d">
+    <p style="font-size:11px;color:var(--muted);text-align:center">bbshoots49@gmail.com &nbsp;/&nbsp; BBShoots@2025</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     DASHBOARD
+═══════════════════════════════════════ -->
+<div id="dashPage" class="shell" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sid-top">
+      <div class="sid-logo">BB<span>SHOOTS</span></div>
+      <div class="sid-sub">Production Admin</div>
+    </div>
+    <nav class="sid-body">
+      <div class="ng"><div class="ng-l">Dashboard</div></div>
+      <button class="snav" id="sn-overview" onclick="navTo('overview')"><span class="si">📊</span> Overview</button>
+      <div class="ng"><div class="ng-l">Management</div></div>
+      <button class="snav" id="sn-bookings" onclick="navTo('bookings')"><span class="si">📋</span> All Bookings</button>
+      <button class="snav" id="sn-clients"  onclick="navTo('clients')"><span class="si">👥</span> Clients</button>
+      <div class="ng"><div class="ng-l">System</div></div>
+      <button class="snav" id="sn-notifs"   onclick="navTo('notifs')">
+        <span class="si">🔔</span> Notifications
+        <span class="nbadge" id="notifBadge" style="display:none">0</span>
+      </button>
+    </nav>
+    <div class="sid-foot">
+      <div class="adm-pill">
+        <div class="adm-av">A</div>
+        <div>
+          <div class="adm-name">Admin</div>
+          <div class="adm-role">BBShoots Productions</div>
+        </div>
+      </div>
+      <button class="btn btn-out btn-sm btn-full" onclick="doLogout()">⬅ Logout</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="pg-title" id="pgTitle">Overview</div>
+        <div class="pg-sub"   id="pgSub">BBShoots Admin Panel</div>
+      </div>
+      <div class="topbar-r">
+        <button class="btn btn-ghost btn-sm" onclick="refreshCurrent()">🔄 Refresh</button>
+        <a href="../index.html" class="btn btn-out btn-sm" target="_blank">🌐 View Site</a>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── OVERVIEW ── -->
+      <div class="panel" id="panel-overview">
+        <div class="stat-row">
+          <div class="sc"><div class="sc-i">📋</div><div class="sc-n" id="s-total" style="color:var(--red)">—</div><div class="sc-l">Total Bookings</div></div>
+          <div class="sc"><div class="sc-i">⏳</div><div class="sc-n" id="s-pend"  style="color:var(--gold)">—</div><div class="sc-l">Pending</div></div>
+          <div class="sc"><div class="sc-i">✅</div><div class="sc-n" id="s-conf"  style="color:var(--green)">—</div><div class="sc-l">Accepted</div></div>
+          <div class="sc"><div class="sc-i">🏆</div><div class="sc-n" id="s-done"  style="color:var(--purple)">—</div><div class="sc-l">Completed</div></div>
+          <div class="sc"><div class="sc-i">👥</div><div class="sc-n" id="s-cli"   style="color:var(--blue)">—</div><div class="sc-l">Active Clients</div></div>
+          <div class="sc"><div class="sc-i">🔔</div><div class="sc-n" id="s-not"   style="color:var(--orange)">—</div><div class="sc-l">Unread</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+          <div class="icard">
+            <div class="icard-t">⚡ Quick Actions</div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <button class="btn btn-red  btn-sm" onclick="navTo('bookings')" style="justify-content:flex-start">📋 Manage Bookings</button>
+              <button class="btn btn-out  btn-sm" onclick="navTo('clients')"  style="justify-content:flex-start">👥 Manage Clients</button>
+              <button class="btn btn-out  btn-sm" onclick="navTo('notifs')"   style="justify-content:flex-start">🔔 Notifications</button>
+              <a href="../index.html" class="btn btn-ghost btn-sm" target="_blank" style="justify-content:flex-start">🌐 Public Website</a>
+            </div>
+          </div>
+          <div class="icard">
+            <div class="icard-t">📊 System Status</div>
+            <div style="font-size:13px;line-height:2.2;color:var(--light)">
+              Admin: <span style="color:var(--muted)">bbshoots49@gmail.com</span><br>
+              Database: <span style="color:var(--green)">● Connected</span><br>
+              Backend: <span style="color:var(--green)">● Running</span><br>
+              Version: <span style="color:var(--muted)">BBShoots v5.0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BOOKINGS (fully editable with stage buttons) ── -->
+      <div class="panel" id="panel-bookings">
+        <div class="stat-row" style="grid-template-columns:repeat(4,1fr)">
+          <div class="sc"><div class="sc-n" id="b-total" style="color:var(--red)">—</div><div class="sc-l">Total</div></div>
+          <div class="sc"><div class="sc-n" id="b-pend"  style="color:var(--gold)">—</div><div class="sc-l">Pending</div></div>
+          <div class="sc"><div class="sc-n" id="b-conf"  style="color:var(--green)">—</div><div class="sc-l">Accepted</div></div>
+          <div class="sc"><div class="sc-n" id="b-done"  style="color:var(--purple)">—</div><div class="sc-l">Completed</div></div>
+        </div>
+        <div class="toolbar">
+          <div class="srch">
+            <span style="color:var(--muted);font-size:14px">🔍</span>
+            <input placeholder="Search name, email, ref, event, location..." oninput="filterBk(this.value)">
+          </div>
+          <div class="fbtns">
+            <button class="fb on" onclick="setFlt(this,'')">All</button>
+            <button class="fb" onclick="setFlt(this,'pending')">Pending</button>
+            <button class="fb" onclick="setFlt(this,'accepted')">Accepted</button>
+            <button class="fb" onclick="setFlt(this,'completed')">Completed</button>
+            <button class="fb" onclick="setFlt(this,'rejected')">Rejected</button>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadBookings()">🔄</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr>
+              <th class="sortable" onclick="sortBy('client_name')">Client</th>
+              <th class="sortable" onclick="sortBy('event_type')">Event</th>
+              <th class="sortable" onclick="sortBy('event_date')">Date</th>
+              <th>Package</th>
+              <th>Booking Status</th>
+              <th>Project Stage (click buttons)</th>
+              <th>Videos</th>
+              <th>Actions</th>
+            </tr></thead>
+            <tbody id="bkBody">
+              <tr><td colspan="8" style="text-align:center;padding:44px;color:var(--muted)">Loading bookings...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── CLIENTS ── -->
+      <div class="panel" id="panel-clients">
+        <div class="toolbar">
+          <div class="srch">
+            <span style="color:var(--muted);font-size:14px">🔍</span>
+            <input placeholder="Search by name, email, phone..." oninput="filterCli(this.value)">
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadClients()">🔄 Refresh</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr>
+              <th>Client</th><th>Phone</th><th>Bookings</th><th>Status</th><th>Joined</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="cliBody">
+              <tr><td colspan="6" style="text-align:center;padding:44px;color:var(--muted)">Loading clients...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── NOTIFICATIONS ── -->
+      <div class="panel" id="panel-notifs">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <p style="color:var(--muted);font-size:13px">New bookings, status changes, contact messages — all in one place.</p>
+          <button class="btn btn-ghost btn-sm" onclick="loadNotifs()">🔄 Refresh</button>
+        </div>
+        <div id="notifList"><p style="color:var(--muted)">Loading...</p></div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div><!-- /dashPage -->
+
+<!-- ══ MODAL: Full Edit Booking ══ -->
+<div class="modal-bg" id="mdEdit">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-head">
+      <div class="modal-title">Edit <span>Booking</span></div>
+      <button class="mx" onclick="closeModal('mdEdit')">✕</button>
+    </div>
+    <div id="mdEditBody"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: View Detail ══ -->
+<div class="modal-bg" id="mdDetail">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <div class="modal-title">Booking <span>Detail</span></div>
+      <button class="mx" onclick="closeModal('mdDetail')">✕</button>
+    </div>
+    <div id="mdDetailBody"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Video Links ══ -->
+<div class="modal-bg" id="mdVideo">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-head">
+      <div class="modal-title">📹 Video <span>Links</span></div>
+      <button class="mx" onclick="closeModal('mdVideo')">✕</button>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:14px">Add Google Drive, WeTransfer or Dropbox links. Client will see them in their portal.</p>
+    <div id="videoList"></div>
+    <div style="display:flex;gap:8px;margin-top:7px">
+      <input id="newUrl" placeholder="Paste video download URL...">
+      <button class="btn btn-out btn-sm" onclick="addUrl()" style="flex-shrink:0">+ Add</button>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:15px">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('mdVideo')">Cancel</button>
+      <button class="btn btn-red   btn-sm" onclick="saveUrls()">💾 Save Links</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Admin Notes ══ -->
+<div class="modal-bg" id="mdNotes">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <div class="modal-title">📝 Admin <span>Notes</span></div>
+      <button class="mx" onclick="closeModal('mdNotes')">✕</button>
+    </div>
+    <input type="hidden" id="notesBkId">
+    <div class="fg">
+      <label>Internal note (admin eyes only)</label>
+      <textarea id="notesInput" rows="5" placeholder="Equipment list, team assignments, shoot reminders..."></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('mdNotes')">Cancel</button>
+      <button class="btn btn-red   btn-sm" onclick="saveNote()">💾 Save Note</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════
+   CURSOR — red dot + lagging ring + trail
+══════════════════════════════════════════════ */
+(function(){
+  var dot=document.getElementById('cur-dot');
+  var ring=document.getElementById('cur-ring');
+  var trail=document.getElementById('cur-trail');
+  var mx=0,my=0,rx=0,ry=0,tx=0,ty=0;
+
+  document.addEventListener('mousemove',function(e){
+    mx=e.clientX; my=e.clientY;
+    dot.style.left=mx+'px'; dot.style.top=my+'px';
+  });
+
+  (function loop(){
+    rx+=(mx-rx)*.13; ry+=(my-ry)*.13;
+    ring.style.left=rx+'px'; ring.style.top=ry+'px';
+    tx+=(mx-tx)*.06; ty+=(my-ty)*.06;
+    trail.style.left=tx+'px'; trail.style.top=ty+'px';
+    requestAnimationFrame(loop);
+  })();
+
+  document.addEventListener('mousedown',function(){
+    document.body.classList.add('c-click');
+    setTimeout(function(){ document.body.classList.remove('c-click'); },140);
+  });
+
+  document.addEventListener('mouseover',function(e){
+    var h=e.target.closest&&e.target.closest('button,a,.snav,.fb,.ab,.sc,.tbl tbody tr,.mx,.isel,select,input,textarea');
+    document.body.classList[h?'add':'remove']('c-hover');
+  });
+})();
+
+/* ══════════════════════════════════════════════
+   API — XMLHttpRequest, auto path detection
+══════════════════════════════════════════════ */
+var API=(function(){
+  var p=window.location.pathname.replace(/\/+$/,'').split('/');
+  return window.location.protocol+'//'+window.location.host+'/'+(p[1]||'bbshoots')+'/api/index.php';
+}());
+
+function callAPI(action, params, data, onOk, onErr) {
+  // Overload handling: if second arg is a function, it's onOk
+  if (typeof params === 'function') {
+    onErr = data;
+    onOk = params;
+    data = null;
+    params = {};
+  } else if (typeof data === 'function') {
+    onErr = onOk;
+    onOk = data;
+    data = null;
+  }
+  var url = API + '?action=' + encodeURIComponent(action);
+  if (params) {
+    for (var key in params) {
+      url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+    }
+  }
+  var xhr = new XMLHttpRequest();
+  xhr.open(data ? 'POST' : 'GET', url, true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+  xhr.withCredentials = true;
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState !== 4) return;
+    var obj;
+    try {
+      obj = JSON.parse(xhr.responseText);
+    } catch (e) {
+      console.error('Non-JSON ['+action+']:',(xhr.responseText||'').substring(0,300));
+      if (onErr) onErr('Server error — check XAMPP Apache/MySQL is running');
+      return;
+    }
+    if (obj.success) {
+      if (onOk) onOk(obj.data);
+    } else {
+      if (onErr) onErr(obj.error || 'Unknown error');
+    }
+  };
+  xhr.onerror = function() {
+    if (onErr) onErr('Network error — is Apache running?');
+  };
+  xhr.send(data ? JSON.stringify(data) : null);
+}
+
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+var allBk=[],allCli=[];
+var bkQ='',bkFlt='',bkSort='created_at',bkDir='desc';
+var curPanel='overview',vidBkId=null,tmpUrls=[];
+
+var PNAMES={overview:'Overview',bookings:'All Bookings',clients:'Clients',notifs:'Notifications'};
+var PSUBS ={overview:'Dashboard',bookings:'Manage & Edit All Bookings',clients:'Client Accounts',notifs:'Activity Feed'};
+
+// Project stages in order – must match backend expectations (from client portal)
+var STAGES=['scheduled','shooting','editing','review','completed'];
+var STAGE_PCT={scheduled:15,shooting:35,editing:60,review:82,completed:100};
+var STAGE_ICO={scheduled:'📅',shooting:'🎥',editing:'✂️',review:'👁',completed:'🏆'};
+// Valid booking statuses – backend expects: pending, confirmed, completed, cancelled, rejected
+var BK_STS=['pending','confirmed','completed','cancelled','rejected'];
+// Valid project stages – now using backend‑compatible names
+var PR_STS=['scheduled','shooting','editing','review','completed'];
+var PKGS  =['Basic','Standard','Premium'];
+
+/* ══════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════ */
+function toast(msg,type,dur){
+  type=type||'ok'; dur=dur||3500;
+  var icons={ok:'✅',err:'❌',info:'ℹ️',warn:'⚠️'};
+  var d=document.createElement('div');
+  d.className='toast t-'+type;
+  d.innerHTML='<span>'+(icons[type]||'•')+'</span><span>'+msg+'</span>';
+  document.getElementById('toasts').appendChild(d);
+  setTimeout(function(){
+    d.style.opacity='0';d.style.transition='opacity .3s';
+    setTimeout(function(){ if(d.parentNode)d.parentNode.removeChild(d); },300);
+  },dur);
+}
+
+/* ══════════════════════════════════════════════
+   AUTH
+══════════════════════════════════════════════ */
+function doLogin(){
+  var email=document.getElementById('aEmail').value.trim();
+  var pass=document.getElementById('aPass').value;
+  if(!email||!pass){ toast('Enter email and password.','err'); return; }
+  var btn=document.getElementById('loginBtn');
+  btn.disabled=true; btn.textContent='Authenticating...';
+  callAPI('admin_login', null, {email:email, password:pass},
+    function(){
+      document.getElementById('loginPage').style.display='none';
+      document.getElementById('dashPage').style.display='flex';
+      navTo('bookings'); loadStats();
+      toast('Welcome back, Admin! 🎬','ok');
+    },
+    function(err){
+      btn.disabled=false; btn.textContent='Access Admin Panel →';
+      toast(err||'Login failed.','err');
+    }
+  );
+}
+
+function doLogout(){
+  callAPI('admin_logout', null, null,
+    function(){ showLogin(); toast('Logged out.','info'); },
+    function(){ showLogin(); }
+  );
+}
+
+function showLogin(){
+  document.getElementById('dashPage').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+}
+
+// Auto login if session exists
+callAPI('check_session', null, null,
+  function(d){
+    if(d&&d.admin){
+      document.getElementById('loginPage').style.display='none';
+      document.getElementById('dashPage').style.display='flex';
+      navTo('bookings'); loadStats();
+    }
+  },
+  function(){}
+);
+
+document.getElementById('aPass').addEventListener('keydown',function(e){
+  if(e.key==='Enter')doLogin();
+});
+
+/* ══════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════ */
+function navTo(p){
+  curPanel=p;
+  ['overview','bookings','clients','notifs'].forEach(function(k){
+    var pe=document.getElementById('panel-'+k);
+    var se=document.getElementById('sn-'+k);
+    if(pe)pe.classList.remove('on');
+    if(se)se.classList.remove('on');
+  });
+  var ap=document.getElementById('panel-'+p);
+  var as=document.getElementById('sn-'+p);
+  if(ap)ap.classList.add('on');
+  if(as)as.classList.add('on');
+  setText('pgTitle',PNAMES[p]||p);
+  setText('pgSub',PSUBS[p]||'');
+  if(p==='bookings')loadBookings();
+  if(p==='clients') loadClients();
+  if(p==='notifs')  loadNotifs();
+  if(p==='overview')loadStats();
+}
+
+function refreshCurrent(){ navTo(curPanel); }
+
+/* ══════════════════════════════════════════════
+   STATS
+══════════════════════════════════════════════ */
+function loadStats(){
+  callAPI('get_stats', null, null,
+    function(s){
+      setText('s-total',s.total_bookings);
+      setText('s-pend', s.pending);
+      setText('s-conf', s.confirmed);
+      setText('s-done', s.completed);
+      setText('s-cli',  s.total_clients);
+      setText('s-not',  s.unread_notifs);
+      var b=document.getElementById('notifBadge');
+      if(b){ b.textContent=s.unread_notifs; b.style.display=s.unread_notifs>0?'inline':'none'; }
+    },
+    function(e){ console.warn('Stats:',e); }
+  );
+}
+
+/* ══════════════════════════════════════════════
+   BOOKINGS — LOAD & RENDER (with stage buttons)
+══════════════════════════════════════════════ */
+function loadBookings(){
+  setTbody('bkBody','Loading bookings...',8);
+  callAPI('get_all_bookings', {sort: bkSort, dir: bkDir}, null,
+    function(data){
+      allBk=data||[];
+      var t=allBk.length,p=0,c=0,d=0;
+      for(var i=0;i<allBk.length;i++){
+        var s=allBk[i].status;
+        if(s==='pending')p++;
+        if(s==='confirmed')c++;
+        if(s==='completed')d++;
+      }
+      setText('b-total',t);setText('b-pend',p);setText('b-conf',c);setText('b-done',d);
+      renderBk(); loadStats();
+    },
+    function(err){ setTbody('bkBody','❌ '+err,8); }
+  );
+}
+
+function renderBk(){
+  var data=[];
+  for(var i=0;i<allBk.length;i++){
+    var b=allBk[i];
+    // filter by status
+    if(bkFlt){
+      var match=b.status===bkFlt||(bkFlt==='accepted'&&b.status==='confirmed'); // UI filter "Accepted" maps to "confirmed"
+      if(!match)continue;
+    }
+    // filter by search text
+    if(bkQ){
+      var q=bkQ.toLowerCase();
+      var hit=(b.client_name||'').toLowerCase().indexOf(q)>-1||
+              (b.email||'').toLowerCase().indexOf(q)>-1||
+              (b.booking_ref||'').toLowerCase().indexOf(q)>-1||
+              (b.event_type||'').toLowerCase().indexOf(q)>-1||
+              (b.location||'').toLowerCase().indexOf(q)>-1||
+              (b.phone||'').indexOf(q)>-1;
+      if(!hit)continue;
+    }
+    data.push(b);
+  }
+
+  if(!data.length){ setTbody('bkBody','No bookings found.',8); return; }
+
+  var html='';
+  for(var i=0;i<data.length;i++){
+    var b=data[i],bid=b.id;
+    var ps=b.project_status||'scheduled';  // default to scheduled
+    var pct=STAGE_PCT[ps]||0;
+    var vc=(b.video_urls||[]).length;
+
+    // Build status options (using backend‑compatible names)
+    var bkOpts='';
+    for(var j=0;j<BK_STS.length;j++){
+      var sel=(b.status===BK_STS[j])?'selected':'';
+      bkOpts+='<option value="'+BK_STS[j]+'" '+sel+'>'+cap(BK_STS[j])+'</option>';
+    }
+
+    // Generate stage buttons
+    var stageBtns='';
+    for(var j=0;j<STAGES.length;j++){
+      var s=STAGES[j];
+      var activeClass=(ps===s)?'active':'';
+      stageBtns+=`<button class="stage-btn ${activeClass}" onclick="updPrSt(${bid},'${s}')" title="${cap(s)}">${STAGE_ICO[s]}</button>`;
+    }
+
+    html+='<tr data-bkid="'+bid+'">'+
+      '<td>'+
+        '<div class="cn">'+esc(b.client_name)+'</div>'+
+        '<div class="cs">'+esc(b.email)+'</div>'+
+        '<div class="cs">'+esc(b.phone)+'</div>'+
+      '</td>'+
+      '<td>'+
+        '<div style="font-weight:600">'+esc(b.event_type)+'</div>'+
+        '<div class="cs">📍 '+esc(b.location)+'</div>'+
+        '<div class="cs" style="color:var(--red);font-size:10px;font-weight:700">'+esc(b.booking_ref)+'</div>'+
+      '</td>'+
+      '<td style="white-space:nowrap">'+fmtDate(b.event_date)+'</td>'+
+      '<td><span style="background:rgba(255,255,255,.05);border:1px solid var(--border);padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600">'+esc(b.package)+'</span></td>'+
+      // Booking status inline dropdown
+      '<td><select class="isel" onchange="updBkSt('+bid+',this.value)">'+bkOpts+'</select></td>'+
+      // Project Stage: progress bar + stage buttons
+      '<td>'+
+        '<div class="prog-bar"><div class="prog-fill" id="pf-'+bid+'" style="width:'+pct+'%"></div></div>'+
+        '<div class="stage-btns">'+stageBtns+'</div>'+
+      '</td>'+
+      // Video links count + button
+      '<td>'+
+        '<div class="cs" style="margin-bottom:4px">'+vc+' link(s)</div>'+
+        '<button class="ab a-gld" onclick="openVid('+bid+')">📹 '+(vc>0?'Edit':'Add')+'</button>'+
+      '</td>'+
+      // Action buttons
+      '<td>'+
+        '<div class="ab-wrap">'+
+          '<button class="ab a-blu" onclick="openDetail('+bid+')">🔍</button>'+
+          '<button class="ab a-ora" onclick="openEdit('+bid+')">✏️ Edit</button>'+
+          '<button class="ab a-mut" onclick="openNotes('+bid+')">📝</button>'+
+          (b.status!=='rejected'&&b.status!=='cancelled'?
+            '<button class="ab a-red" onclick="rejectBk('+bid+')">✕</button>':'')+
+        '</div>'+
+      '</td>'+
+    '</tr>';
+  }
+  document.getElementById('bkBody').innerHTML=html;
+}
+
+function filterBk(q){ bkQ=q; renderBk(); }
+
+function setFlt(btn,f){
+  bkFlt=f;
+  var all=document.querySelectorAll('.fbtns .fb');
+  for(var i=0;i<all.length;i++)all[i].classList.remove('on');
+  btn.classList.add('on');
+  renderBk();
+}
+
+function sortBy(field){
+  if(bkSort===field)bkDir=bkDir==='asc'?'desc':'asc';
+  else{ bkSort=field; bkDir='desc'; }
+  loadBookings();
+}
+
+/* ── Inline status/stage updates ── */
+function updBkSt(id,status){
+  callAPI('update_booking', null, {id:id, status:status},
+    function(){
+      var b=findBk(id); if(b)b.status=status;
+      toast('Booking → '+cap(status),'ok'); loadStats();
+    },
+    function(e){ toast(e||'Update failed.','err'); loadBookings(); }
+  );
+}
+
+function updPrSt(id,stage){
+  callAPI('update_project', null, {booking_id:id, status:stage},
+    function(){
+      var b=findBk(id); if(b)b.project_status=stage;
+      // Update progress bar
+      var pf=document.getElementById('pf-'+id);
+      if(pf)pf.style.width=(STAGE_PCT[stage]||0)+'%';
+      // Update stage button active states within the same row
+      var row=document.querySelector(`tr[data-bkid="${id}"]`);
+      if(row){
+        var btns=row.querySelectorAll('.stage-btn');
+        for(var i=0;i<btns.length;i++){
+          var btn=btns[i];
+          var s=btn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1]; // extract stage from onclick
+          if(s===stage) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+      }
+      toast('Stage → '+cap(stage),'ok');
+    },
+    function(e){ toast(e||'Update failed.','err'); loadBookings(); }
+  );
+}
+
+function rejectBk(id){
+  if(!confirm('Reject this booking? The client will be notified by email.'))return;
+  callAPI('update_booking', null, {id:id, status:'rejected'},
+    function(){
+      var b=findBk(id); if(b)b.status='rejected';
+      toast('Booking rejected. Client notified.','warn');
+      renderBk(); loadStats();
+    },
+    function(e){ toast(e||'Reject failed.','err'); }
+  );
+}
+
+/* ══════════════════════════════════════════════
+   FULL EDIT MODAL
+══════════════════════════════════════════════ */
+function openEdit(id){
+  var b=findBk(id);
+  if(!b){ toast('Booking not found.','err'); return; }
+
+  var ps=b.project_status||'scheduled';
+  var pct=STAGE_PCT[ps]||0;
+
+  // Build selects with correct backend values
+  var bkOpts='',prOpts='',pkOpts='';
+  for(var j=0;j<BK_STS.length;j++) bkOpts+='<option value="'+BK_STS[j]+'"'+(b.status===BK_STS[j]?' selected':'')+'>'+cap(BK_STS[j])+'</option>';
+  for(var j=0;j<PR_STS.length;j++) prOpts+='<option value="'+PR_STS[j]+'"'+(ps===PR_STS[j]?' selected':'')+'>'+cap(PR_STS[j])+'</option>';
+  for(var j=0;j<PKGS.length;j++)   pkOpts+='<option value="'+PKGS[j]+'"'+(b.package===PKGS[j]?' selected':'')+'>'+PKGS[j]+'</option>';
+
+  // Build stage click-buttons
+  var stgHtml='';
+  for(var j=0;j<STAGES.length;j++){
+    var s=STAGES[j];
+    var cls='stg'+(s===ps?' now':(STAGES.indexOf(s)<STAGES.indexOf(ps)?' done':''));
+    stgHtml+='<button class="'+cls+'" data-s="'+s+'" onclick="clickStg(this)">'+STAGE_ICO[s]+' '+cap(s)+'</button>';
+  }
+
+  document.getElementById('mdEditBody').innerHTML=
+    '<input type="hidden" id="eId" value="'+id+'">'+
+
+    // Section: Status & Package
+    '<div class="es">'+
+      '<div class="es-t">📋 Booking & Package</div>'+
+      '<div class="g2">'+
+        '<div class="fg"><label>Booking Status</label><select id="eBkSt">'+bkOpts+'</select></div>'+
+        '<div class="fg"><label>Package</label><select id="ePkg">'+pkOpts+'</select></div>'+
+      '</div>'+
+    '</div>'+
+
+    // Section: Project Stage
+    '<div class="es">'+
+      '<div class="es-t">🎬 Project Stage</div>'+
+      '<div class="fg"><label>Stage</label><select id="ePrSt" onchange="syncStg(this.value)">'+prOpts+'</select></div>'+
+      '<div style="font-size:11px;color:var(--muted);margin-bottom:5px">Click a stage to jump directly:</div>'+
+      '<div class="stage-row" id="eStgRow">'+stgHtml+'</div>'+
+      '<div class="prog-bar" style="height:7px;margin-top:10px"><div class="prog-fill" id="eProgFill" style="width:'+pct+'%"></div></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px"><span>Scheduled</span><span>Shooting</span><span>Editing</span><span>Review</span><span>Done</span></div>'+
+    '</div>'+
+
+    // Section: Event Details
+    '<div class="es">'+
+      '<div class="es-t">📅 Event Details</div>'+
+      '<div class="g2">'+
+        '<div class="fg"><label>Event Type</label><input id="eEvType" value="'+esc(b.event_type||'')+'"></div>'+
+        '<div class="fg"><label>Event Date</label><input type="date" id="eDate" value="'+(b.event_date||'').substring(0,10)+'"></div>'+
+      '</div>'+
+      '<div class="fg"><label>Location / Venue</label><input id="eLoc" value="'+esc(b.location||'')+'"></div>'+
+    '</div>'+
+
+    // Section: Client Info
+    '<div class="es">'+
+      '<div class="es-t">👤 Client Information</div>'+
+      '<div class="g2">'+
+        '<div class="fg"><label>Client Name</label><input id="eName" value="'+esc(b.client_name||'')+'"></div>'+
+        '<div class="fg"><label>Phone</label><input id="ePhone" value="'+esc(b.phone||'')+'"></div>'+
+      '</div>'+
+    '</div>'+
+
+    // Section: Notes
+    '<div class="es">'+
+      '<div class="es-t">📝 Notes</div>'+
+      '<div class="fg"><label>Client Notes</label><textarea id="eNotes" rows="2">'+esc(b.notes||'')+'</textarea></div>'+
+      '<div class="fg"><label>Admin Internal Note (not visible to client)</label><textarea id="eAdminNotes" rows="2">'+esc(b.admin_notes||'')+'</textarea></div>'+
+    '</div>'+
+
+    '<div style="display:flex;gap:8px;justify-content:flex-end">'+
+      '<button class="btn btn-ghost btn-sm" onclick="closeModal(\'mdEdit\')">Cancel</button>'+
+      '<button class="btn btn-red   btn-sm" onclick="saveEdit()">💾 Save All Changes</button>'+
+    '</div>';
+
+  openModal('mdEdit');
+}
+
+// Sync progress bar + stage button highlights when select changes
+function syncStg(stage){
+  var pct=STAGE_PCT[stage]||0;
+  var fill=document.getElementById('eProgFill');
+  if(fill)fill.style.width=pct+'%';
+  var btns=document.querySelectorAll('#eStgRow .stg');
+  var ord=STAGES.indexOf(stage);
+  for(var i=0;i<btns.length;i++){
+    var s=btns[i].getAttribute('data-s');
+    btns[i].className='stg';
+    if(s===stage)btns[i].classList.add('now');
+    else if(STAGES.indexOf(s)<ord)btns[i].classList.add('done');
+  }
+}
+
+// When a stage button is clicked, update select + UI
+function clickStg(btn){
+  var s=btn.getAttribute('data-s');
+  var sel=document.getElementById('ePrSt');
+  if(sel)sel.value=s;
+  syncStg(s);
+}
+
+function saveEdit(){
+  var id=parseInt(document.getElementById('eId').value,10);
+  if(!id){ toast('No booking ID.','err'); return; }
+
+  var bkPayload={
+    id:         id,
+    status:     document.getElementById('eBkSt').value,
+    package:    document.getElementById('ePkg').value,
+    event_type: document.getElementById('eEvType').value.trim(),
+    event_date: document.getElementById('eDate').value,
+    location:   document.getElementById('eLoc').value.trim(),
+    client_name:document.getElementById('eName').value.trim(),
+    phone:      document.getElementById('ePhone').value.trim(),
+    notes:      document.getElementById('eNotes').value.trim()
+  };
+
+  var prPayload={
+    booking_id:  id,
+    status:      document.getElementById('ePrSt').value,
+    admin_notes: document.getElementById('eAdminNotes').value.trim()
+  };
+
+  var done=0,errs=[];
+  function check(){
+    if(++done<2)return;
+    if(errs.length){ toast('Errors: '+errs.join(' | '),'err'); return; }
+    // Update local state
+    var b=findBk(id);
+    if(b){
+      b.status=bkPayload.status; b.package=bkPayload.package;
+      b.event_type=bkPayload.event_type; b.event_date=bkPayload.event_date;
+      b.location=bkPayload.location; b.client_name=bkPayload.client_name;
+      b.phone=bkPayload.phone; b.notes=bkPayload.notes;
+      b.project_status=prPayload.status; b.admin_notes=prPayload.admin_notes;
+    }
+    toast('All changes saved! ✅','ok');
+    closeModal('mdEdit');
+    renderBk(); loadStats();
+  }
+
+  callAPI('update_booking', null, bkPayload, function(){check();}, function(e){errs.push('Booking: '+e);check();});
+  callAPI('update_project', null, prPayload, function(){check();}, function(e){errs.push('Project: '+e);check();});
+}
+
+/* ══════════════════════════════════════════════
+   DETAIL VIEW MODAL
+══════════════════════════════════════════════ */
+function openDetail(id){
+  var b=findBk(id); if(!b)return;
+  var ps=b.project_status||'scheduled';
+  var pct=STAGE_PCT[ps]||0;
+
+  document.getElementById('mdDetailBody').innerHTML=
+    '<div style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:9px;padding:16px;margin-bottom:13px">'+
+      dr('Ref',       '<span style="color:var(--red);font-weight:700">'+esc(b.booking_ref)+'</span>')+
+      dr('Client',    esc(b.client_name))+
+      dr('Email',     esc(b.email))+
+      dr('Phone',     esc(b.phone))+
+      dr('Event',     esc(b.event_type))+
+      dr('Date',      fmtDate(b.event_date))+
+      dr('Location',  esc(b.location))+
+      dr('Package',   esc(b.package))+
+      dr('Status',    '<span class="badge b-'+b.status+'">'+b.status+'</span>')+
+      dr('Stage',     '<span class="badge b-'+ps+'">'+ps+'</span>')+
+      dr('Progress',  '<div class="prog-bar" style="width:180px;display:inline-block"><div class="prog-fill" style="width:'+pct+'%"></div></div> <span style="font-size:11px;color:var(--muted);margin-left:6px">'+pct+'%</span>')+
+      dr('Client Note',b.notes?esc(b.notes):'<span style="color:var(--muted)">—</span>')+
+      dr('Admin Note', b.admin_notes?esc(b.admin_notes):'<span style="color:var(--muted)">—</span>')+
+      dr('Submitted',  fmtDateTime(b.created_at))+
+      (b.video_urls&&b.video_urls.length?dr('Videos','<span style="color:var(--green)">'+b.video_urls.length+' link(s) attached</span>'):'') +
+    '</div>'+
+    '<div style="display:flex;gap:7px;flex-wrap:wrap">'+
+      '<button class="btn btn-red  btn-sm" onclick="openEdit('+id+');closeModal(\'mdDetail\')">✏️ Edit Booking</button>'+
+      '<button class="btn btn-out  btn-sm" onclick="openVid('+id+');closeModal(\'mdDetail\')">📹 Manage Videos</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="openNotes('+id+');closeModal(\'mdDetail\')">📝 Admin Notes</button>'+
+    '</div>';
+
+  openModal('mdDetail');
+}
+
+/* ══════════════════════════════════════════════
+   ADMIN NOTES MODAL
+══════════════════════════════════════════════ */
+function openNotes(id){
+  var b=findBk(id);
+  document.getElementById('notesBkId').value =id;
+  document.getElementById('notesInput').value=b?(b.admin_notes||''):'';
+  openModal('mdNotes');
+}
+
+function saveNote(){
+  var id=parseInt(document.getElementById('notesBkId').value,10);
+  var notes=document.getElementById('notesInput').value.trim();
+  callAPI('update_project', null, {booking_id:id, admin_notes:notes},
+    function(){
+      var b=findBk(id); if(b)b.admin_notes=notes;
+      toast('Note saved.','ok'); closeModal('mdNotes');
+    },
+    function(e){ toast(e||'Save failed.','err'); }
+  );
+}
+
+/* ══════════════════════════════════════════════
+   VIDEO LINKS MODAL
+══════════════════════════════════════════════ */
+function openVid(id){
+  vidBkId=id;
+  var b=findBk(id);
+  tmpUrls=b&&b.video_urls?b.video_urls.slice():[];
+  document.getElementById('newUrl').value='';
+  renderUrls();
+  openModal('mdVideo');
+}
+
+function renderUrls(){
+  var list=document.getElementById('videoList');
+  if(!tmpUrls.length){
+    list.innerHTML='<p style="color:var(--muted);font-size:13px;margin-bottom:9px">No video links yet. Add one below.</p>';
+    return;
+  }
+  var h='';
+  for(var i=0;i<tmpUrls.length;i++)
+    h+='<div class="vr"><span>🎬</span><span class="vr-t" title="'+esc(tmpUrls[i])+'">'+esc(tmpUrls[i])+'</span><button class="vdel" onclick="delUrl('+i+')">✕</button></div>';
+  list.innerHTML=h;
+}
+
+function addUrl(){
+  var u=document.getElementById('newUrl').value.trim();
+  if(!u){ toast('Paste a URL first.','err'); return; }
+  try{ new URL(u); }catch(e){ toast('Invalid URL format.','err'); return; }
+  for(var i=0;i<tmpUrls.length;i++) if(tmpUrls[i]===u){ toast('Already added.','err'); return; }
+  tmpUrls.push(u);
+  document.getElementById('newUrl').value='';
+  renderUrls();
+  toast('URL added — click Save to confirm.','info');
+}
+
+function delUrl(i){ tmpUrls.splice(i,1); renderUrls(); }
+
+function saveUrls(){
+  callAPI('update_project', null, {booking_id:vidBkId, video_urls:tmpUrls},
+    function(){
+      var b=findBk(vidBkId); if(b)b.video_urls=tmpUrls.slice();
+      toast('Video links saved! Client can see them in their portal.','ok');
+      closeModal('mdVideo'); renderBk();
+    },
+    function(e){ toast(e||'Save failed.','err'); }
+  );
+}
+
+/* ══════════════════════════════════════════════
+   CLIENTS
+══════════════════════════════════════════════ */
+function loadClients(){
+  setTbody('cliBody','Loading clients...',6);
+  callAPI('get_all_clients', null, null,
+    function(data){ allCli=data||[]; renderCli(allCli); },
+    function(err){ setTbody('cliBody','❌ '+err,6); }
+  );
+}
+
+function filterCli(q){
+  if(!q){ renderCli(allCli); return; }
+  var ql=q.toLowerCase(),out=[];
+  for(var i=0;i<allCli.length;i++){
+    var c=allCli[i];
+    if((c.name||'').toLowerCase().indexOf(ql)>-1||
+       (c.email||'').toLowerCase().indexOf(ql)>-1||
+       (c.phone||'').indexOf(ql)>-1)out.push(c);
+  }
+  renderCli(out);
+}
+
+function renderCli(data){
+  if(!data.length){ setTbody('cliBody','No clients found.',6); return; }
+  var h='';
+  for(var i=0;i<data.length;i++){
+    var c=data[i],cid=c.id,acts='';
+    if(c.status==='active')
+      acts='<button class="ab a-gld" onclick="cliAct('+cid+',\'suspend\')">⏸ Suspend</button>'+
+           '<button class="ab a-red" onclick="cliAct('+cid+',\'remove\')">✕ Remove</button>';
+    else if(c.status==='suspended')
+      acts='<button class="ab a-grn" onclick="cliAct('+cid+',\'restore\')">▶ Restore</button>'+
+           '<button class="ab a-red" onclick="cliAct('+cid+',\'remove\')">✕ Remove</button>';
+    else
+      acts='<span style="color:var(--muted);font-size:11px">Account removed</span>';
+
+    h+='<tr>'+
+      '<td><div class="cn">'+esc(c.name)+'</div><div class="cs">'+esc(c.email)+'</div></td>'+
+      '<td style="color:var(--muted);font-size:13px">'+esc(c.phone)+'</td>'+
+      '<td style="text-align:center;font-weight:600">'+(c.booking_count||0)+'</td>'+
+      '<td><span class="badge b-'+c.status+'">'+c.status+'</span></td>'+
+      '<td style="color:var(--muted);font-size:12px">'+fmtDate(c.created_at)+'</td>'+
+      '<td><div class="ab-wrap">'+acts+'</div></td>'+
+    '</tr>';
+  }
+  document.getElementById('cliBody').innerHTML=h;
+}
+
+function cliAct(id,action){
+  var msgs={remove:'Permanently remove this client?',suspend:'Suspend this client account?',restore:'Restore this client account?'};
+  if(!confirm(msgs[action]||'Confirm?'))return;
+  callAPI('remove_client', null, {id:id, action:action},
+    function(){ toast('Client '+action+'d successfully.','ok'); loadClients(); loadStats(); },
+    function(e){ toast(e||'Action failed.','err'); }
+  );
+}
+
+/* ══════════════════════════════════════════════
+   NOTIFICATIONS
+══════════════════════════════════════════════ */
+function loadNotifs(){
+  var wrap=document.getElementById('notifList');
+  wrap.innerHTML='<p style="color:var(--muted)">Loading...</p>';
+  callAPI('get_notifications', null, null,
+    function(data){
+      // Mark all as read silently
+      callAPI('mark_read', null, null, function(){}, function(){});
+      var badge=document.getElementById('notifBadge');
+      if(badge)badge.style.display='none';
+      var items=data.items||[];
+      if(!items.length){ wrap.innerHTML='<div style="text-align:center;padding:52px;color:var(--muted)">🔔 No notifications yet.</div>'; return; }
+      var icons={new_booking:'📋',status_update:'🔄',project_complete:'✅',contact:'📩',client_action:'👤'};
+      var h='';
+      for(var i=0;i<items.length;i++){
+        var n=items[i];
+        h+='<div class="ni '+(n.is_read?'':'unread')+'">'+
+          '<div class="ni-ico">'+(icons[n.type]||'🔔')+'</div>'+
+          '<div>'+
+            '<div class="ni-msg">'+esc(n.message)+'</div>'+
+            '<div class="ni-t">'+fmtDateTime(n.created_at)+'</div>'+
+          '</div>'+
+        '</div>';
+      }
+      wrap.innerHTML=h;
+    },
+    function(err){ wrap.innerHTML='<p style="color:var(--red);padding:16px">❌ '+err+'</p>'; }
+  );
+}
+
+/* ══════════════════════════════════════════════
+   MODALS
+══════════════════════════════════════════════ */
+function openModal(id){
+  var m=document.getElementById(id);
+  if(m){ m.classList.add('open'); document.body.style.overflow='hidden'; }
+}
+function closeModal(id){
+  var m=document.getElementById(id);
+  if(m){ m.classList.remove('open'); document.body.style.overflow=''; }
+}
+
+// Click backdrop to close
+document.addEventListener('click',function(e){
+  if(e.target&&e.target.classList.contains('modal-bg')){
+    e.target.classList.remove('open');
+    document.body.style.overflow='';
+  }
+});
+
+// ESC closes any open modal
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    var ms=document.querySelectorAll('.modal-bg.open');
+    for(var i=0;i<ms.length;i++)ms[i].classList.remove('open');
+    document.body.style.overflow='';
+  }
+});
+
+/* ══════════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════════ */
+function findBk(id){ for(var i=0;i<allBk.length;i++)if(allBk[i].id===id)return allBk[i]; return null; }
+function setText(id,v){ var e=document.getElementById(id); if(e)e.textContent=v; }
+function setTbody(id,msg,cols){ var e=document.getElementById(id); if(e)e.innerHTML='<tr><td colspan="'+cols+'" style="text-align:center;padding:40px;color:var(--muted)">'+msg+'</td></tr>'; }
+
+function esc(s){
+  if(!s)return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function cap(s){ return s?s.charAt(0).toUpperCase()+s.slice(1):''; }
+function dr(l,v){ return '<div class="dr"><span class="dl">'+l+'</span><span class="dv">'+v+'</span></div>'; }
+function fmtDate(s){ if(!s)return '—'; try{ return new Date(s).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }catch(e){return s;} }
+function fmtDateTime(s){ if(!s)return '—'; try{ return new Date(s).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){return s;} }
+</script>
+</body>
+</html>

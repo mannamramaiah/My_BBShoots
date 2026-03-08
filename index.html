@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBShoots — Professional Photography & Videography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+/* ── Variables ── */
+:root{
+  --red:#dc2626;--red-dark:#b91c1c;--red-dim:rgba(220,38,38,0.12);--red-glow:rgba(220,38,38,0.3);
+  --bg:#0a0c10;--bg2:#0f1318;--bg3:#141c2b;--card:#111827;--card2:#16202f;
+  --border:#1e2d45;--border2:#243247;
+  --text:#f1f5f9;--muted:#64748b;--light:#94a3b8;
+  --gold:#fbbf24;--green:#34d399;--purple:#a78bfa;--blue:#60a5fa;--orange:#fb923c;
+  --fd:'Bebas Neue',sans-serif;--fb:'Outfit',sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh;overflow-x:hidden}
+::selection{background:var(--red);color:#fff}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--red-dark);border-radius:3px}
+
+/* ── Animations ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(36px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.88)}to{opacity:1;transform:scale(1)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.45}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes grain{0%,100%{transform:translate(0,0)}10%{transform:translate(-2%,-3%)}20%{transform:translate(-4%,2%)}30%{transform:translate(3%,-1%)}40%{transform:translate(-1%,4%)}50%{transform:translate(3%,2%)}60%{transform:translate(-4%,1%)}70%{transform:translate(2%,-3%)}80%{transform:translate(-1%,2%)}90%{transform:translate(3%,-4%)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes borderPulse{0%,100%{box-shadow:0 0 0 0 var(--red-glow)}50%{box-shadow:0 0 0 8px transparent}}
+
+/* Film grain */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.4;animation:grain 8s steps(10) infinite}
+
+/* ── Custom cursor ── */
+.cur{position:fixed;width:10px;height:10px;background:var(--red);border-radius:50%;pointer-events:none;z-index:10000;transition:transform .1s;mix-blend-mode:difference}
+.cur-r{position:fixed;width:34px;height:34px;border:1.5px solid rgba(220,38,38,.5);border-radius:50%;pointer-events:none;z-index:9999;transition:width .2s,height .2s,border-color .2s}
+.cur-r.big{width:52px;height:52px;border-color:var(--red)}
+@media(max-width:768px){.cur,.cur-r{display:none}body{cursor:auto}button,a{cursor:pointer}}
+
+/* ── Layout ── */
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+.page{display:none;animation:fadeIn .45s ease}
+.page.active{display:block}
+.hidden{display:none!important}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:680px){.grid2{grid-template-columns:1fr}}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;transition:background .3s,border-color .3s}
+nav.scrolled{background:rgba(10,12,16,.94);backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:1200px;margin:0 auto;padding:0 24px;height:68px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:var(--fd);font-size:28px;letter-spacing:3px;color:var(--text);cursor:pointer;text-decoration:none}
+.nav-logo span{color:var(--red)}
+.nav-links{display:flex;gap:4px;align-items:center}
+.nav-btn{background:none;border:none;color:var(--light);font-family:var(--fb);font-size:14px;padding:8px 13px;border-radius:8px;cursor:pointer;transition:color .2s}
+.nav-btn:hover{color:var(--text)}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:8px;border:none;cursor:pointer;font-family:var(--fb);font-weight:600;font-size:15px;text-decoration:none;transition:all .25s;white-space:nowrap;position:relative;overflow:hidden}
+.btn-red{background:var(--red);color:#fff;box-shadow:0 4px 18px rgba(220,38,38,.28)}
+.btn-red:hover{background:var(--red-dark);transform:translateY(-2px);box-shadow:0 8px 28px rgba(220,38,38,.42)}
+.btn-red:active{transform:translateY(0)}
+.btn-out{background:transparent;color:var(--text);border:1.5px solid var(--border)}
+.btn-out:hover{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--light);border:1px solid var(--border)}
+.btn-ghost:hover{background:rgba(255,255,255,.1);color:var(--text)}
+.btn-sm{padding:8px 18px;font-size:13px}
+.btn-full{width:100%;justify-content:center}
+.btn-lg{padding:15px 38px;font-size:16px}
+.btn:disabled{opacity:.6;pointer-events:none}
+
+/* ── Forms ── */
+input,select,textarea{background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:13px 16px;border-radius:9px;font-family:var(--fb);font-size:15px;width:100%;transition:border-color .2s,box-shadow .2s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,.1);background:rgba(20,28,43,.95)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+select option{background:var(--bg2)}
+label{display:block;font-size:13px;color:var(--light);margin-bottom:7px;font-weight:500}
+.fg{margin-bottom:20px}
+.fhint{font-size:12px;color:var(--muted);margin-top:5px}
+.ferr{font-size:12px;color:var(--red);margin-top:5px}
+
+/* ── Cards ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px}
+
+/* ── Badges ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase}
+.badge::before{content:'•';font-size:13px}
+.b-pending{background:#1a2235;color:var(--gold);border:1px solid rgba(251,191,36,.25)}
+.b-confirmed{background:#0d1f1a;color:var(--green);border:1px solid rgba(52,211,153,.25)}
+.b-completed{background:#1a1a2e;color:var(--purple);border:1px solid rgba(167,139,250,.25)}
+.b-cancelled,.b-rejected{background:#1f1a1a;color:#f87171;border:1px solid rgba(248,113,113,.25)}
+.b-scheduled{background:#1a2235;color:var(--blue);border:1px solid rgba(96,165,250,.25)}
+.b-shooting{background:#1f1a10;color:var(--orange);border:1px solid rgba(251,146,60,.25)}
+.b-editing{background:#1a1535;color:#c084fc;border:1px solid rgba(192,132,252,.25)}
+.b-review{background:#101f2e;color:var(--blue);border:1px solid rgba(56,189,248,.25)}
+
+/* ── Toast ── */
+#toasts{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:9px}
+.toast{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:13px 18px;font-size:14px;max-width:310px;display:flex;align-items:center;gap:10px;animation:fadeUp .3s ease;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.toast-ok{border-left:4px solid var(--green)}
+.toast-err{border-left:4px solid var(--red)}
+.toast-info{border-left:4px solid var(--blue)}
+
+/* ── HERO ── */
+#hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 24px 60px;position:relative;overflow:hidden}
+#hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(220,38,38,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(220,38,38,.04) 1px,transparent 1px);background-size:60px 60px}
+#hero::after{content:'';position:absolute;top:-8%;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(220,38,38,.13) 0%,transparent 68%);pointer-events:none}
+.hero-float{position:absolute;font-size:70px;opacity:.05;pointer-events:none}
+.hf1{top:15%;left:7%;animation:float 7s ease-in-out infinite}
+.hf2{top:18%;right:8%;animation:float 6s 2s ease-in-out infinite}
+.hf3{bottom:22%;left:10%;animation:float 8s 1s ease-in-out infinite}
+.hf4{bottom:20%;right:9%;animation:float 7s 3s ease-in-out infinite}
+.hero-cnt{position:relative;z-index:1}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.3);color:var(--red);padding:7px 18px;border-radius:30px;font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;margin-bottom:28px;animation:fadeUp .7s .2s both}
+.hero-tag::before{content:'';width:6px;height:6px;background:var(--red);border-radius:50%;animation:pulse 1.5s infinite}
+.hero-title{font-family:var(--fd);font-size:clamp(70px,14vw,138px);line-height:.88;letter-spacing:6px;margin-bottom:26px;animation:fadeUp .8s .3s both}
+.hero-title .r{color:var(--red)}
+.hero-sub{font-size:clamp(15px,2vw,18px);color:var(--light);max-width:560px;margin:0 auto 42px;line-height:1.75;font-weight:300;animation:fadeUp .8s .45s both}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;animation:fadeUp .8s .6s both}
+.scroll-ind{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:11px;letter-spacing:2px;text-transform:uppercase;animation:fadeIn 1s 1.2s both}
+.scroll-line{width:1px;height:38px;background:linear-gradient(to bottom,transparent,var(--red));animation:pulse 1.5s ease-in-out infinite}
+
+/* ── Services ── */
+.sec{padding:96px 0}
+.sec-tag{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:12px;display:flex;align-items:center;gap:12px;justify-content:center}
+.sec-tag::before,.sec-tag::after{content:'';flex:1;max-width:40px;height:1px;background:var(--red)}
+.sec-title{font-family:var(--fd);font-size:clamp(38px,6vw,58px);letter-spacing:3px;line-height:1;margin-bottom:12px;text-align:center}
+.sec-title span{color:var(--red)}
+.sec-sub{color:var(--muted);font-size:16px;line-height:1.6;text-align:center;margin-bottom:56px}
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
+.svc-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:30px 26px;cursor:pointer;transition:all .35s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden}
+.svc-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(220,38,38,.07),transparent);opacity:0;transition:opacity .3s}
+.svc-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent);transform:scaleX(0);transition:transform .4s}
+.svc-card:hover{border-color:rgba(220,38,38,.5);transform:translateY(-8px) scale(1.01);box-shadow:0 20px 56px rgba(0,0,0,.5),0 0 36px rgba(220,38,38,.07)}
+.svc-card:hover::before{opacity:1}.svc-card:hover::after{transform:scaleX(1)}
+.svc-emoji{font-size:40px;margin-bottom:16px;display:block;transition:transform .3s}
+.svc-card:hover .svc-emoji{transform:scale(1.15) rotate(-4deg)}
+.svc-name{font-family:var(--fd);font-size:23px;letter-spacing:1px;margin-bottom:9px}
+.svc-desc{color:var(--muted);font-size:14px;line-height:1.6}
+
+/* ── CTA band ── */
+.cta-band{background:linear-gradient(135deg,#0f1923,#1a0a0a 50%,#0f1923);border:1px solid var(--border);border-radius:20px;padding:76px 56px;text-align:center;position:relative;overflow:hidden}
+.cta-band::before{content:'';position:absolute;top:-40%;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(220,38,38,.15) 0%,transparent 68%)}
+.cta-band::after{content:'🎬';position:absolute;right:-20px;bottom:-30px;font-size:180px;opacity:.04;transform:rotate(-15deg)}
+.cta-title{font-family:var(--fd);font-size:clamp(32px,5.5vw,62px);letter-spacing:3px;position:relative;z-index:1;margin-bottom:14px}
+.cta-title span{color:var(--red)}
+.cta-sub{color:var(--light);max-width:480px;margin:0 auto 34px;line-height:1.7;position:relative;z-index:1}
+
+/* ── About ── */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+@media(max-width:768px){.about-grid{grid-template-columns:1fr}}
+.about-visual{background:var(--card);border:1px solid var(--border);border-radius:20px;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.about-visual::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 70%,rgba(220,38,38,.2),transparent 60%);animation:pulse 4s ease-in-out infinite}
+.about-emoji{font-size:110px;position:relative;z-index:1;animation:float 5s ease-in-out infinite}
+.about-lbl{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.about-lbl::before{content:'';width:28px;height:2px;background:var(--red)}
+.about-title{font-family:var(--fd);font-size:50px;letter-spacing:2px;margin-bottom:18px;line-height:1}
+.about-title span{color:var(--red)}
+.about-body{color:var(--light);line-height:1.85;font-size:15px;margin-bottom:14px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:28px}
+@media(max-width:680px){.stats-row{grid-template-columns:1fr 1fr}}
+.stat-it{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:18px 14px;text-align:center}
+.stat-num{font-family:var(--fd);font-size:36px;color:var(--red)}
+.stat-lbl{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* ── Contact ── */
+.contact-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:56px;align-items:start}
+@media(max-width:768px){.contact-grid{grid-template-columns:1fr}}
+.ci{display:flex;gap:13px;align-items:flex-start;margin-bottom:18px;color:var(--light)}
+.ci-icon{width:42px;height:42px;background:var(--red-dim);border:1px solid rgba(220,38,38,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.ci-lbl{font-size:12px;color:var(--muted);margin-bottom:3px}
+.ci-val{font-size:15px;font-weight:500}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .7s ease,transform .7s ease}
+.reveal.vis{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+.d4{transition-delay:.4s}.d5{transition-delay:.5s}.d6{transition-delay:.6s}
+.d7{transition-delay:.7s}.d8{transition-delay:.8s}
+
+/* ── Booking page ── */
+.bk-wrap{max-width:700px;margin:0 auto}
+.pkg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:4px}
+@media(max-width:600px){.pkg-grid{grid-template-columns:1fr}}
+.pkg{background:var(--bg3);border:1.5px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .25s;text-align:center;position:relative;overflow:hidden}
+.pkg::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(220,38,38,.1),transparent);opacity:0;transition:opacity .25s}
+.pkg:hover,.pkg.sel{border-color:var(--red)}.pkg:hover::before,.pkg.sel::before{opacity:1}
+.pkg.sel{box-shadow:0 0 18px rgba(220,38,38,.15)}
+.pkg-chk{position:absolute;top:9px;right:9px;width:20px;height:20px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;opacity:0;transition:opacity .2s}
+.pkg.sel .pkg-chk{opacity:1}
+.pkg-name{font-weight:700;font-size:16px;margin-bottom:6px}
+.pkg-desc{font-size:12px;color:var(--muted)}
+
+/* Booking confirmation */
+.bk-confirm{background:linear-gradient(135deg,#0d1f1a,#0a0c10);border:1px solid rgba(52,211,153,.28);border-radius:20px;padding:44px;text-align:center}
+.bk-icon{width:78px;height:78px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:34px;animation:scaleIn .5s ease}
+.pay-info{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.25);border-radius:14px;padding:24px;margin-top:24px;text-align:left}
+.pay-info h4{color:var(--gold);margin-bottom:12px;font-size:15px;display:flex;align-items:center;gap:8px}
+.pay-info p{color:var(--light);font-size:14px;line-height:1.75}
+.pay-bank{background:rgba(0,0,0,.3);border-radius:9px;padding:14px;margin-top:14px}
+.pay-bank p{color:var(--light);font-size:13px;line-height:1.8}
+
+/* ── Portal ── */
+.auth-wrap{max-width:450px;margin:0 auto}
+.auth-tabs{display:flex;gap:4px;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:28px}
+.auth-tab{flex:1;padding:10px;border:none;background:none;color:var(--muted);font-family:var(--fb);font-size:14px;font-weight:600;cursor:pointer;border-radius:7px;transition:all .22s}
+.auth-tab.on{background:var(--card2);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.portal-wrap{max-width:940px;margin:0 auto}
+.portal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px;flex-wrap:wrap;gap:14px}
+
+/* Progress */
+.prog-track{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-top:14px}
+.prog-steps{display:flex;align-items:flex-start}
+.prog-step{flex:1;text-align:center;position:relative}
+.prog-dot{width:12px;height:12px;border-radius:50%;background:var(--border);margin:0 auto 6px;position:relative;z-index:1;transition:all .4s}
+.prog-step.done .prog-dot{background:var(--red);box-shadow:0 0 10px rgba(220,38,38,.4)}
+.prog-step.now  .prog-dot{background:var(--red);animation:pulse 1s infinite}
+.prog-line{position:absolute;top:5px;left:50%;right:-50%;height:2px;background:var(--border);transition:background .4s}
+.prog-step.done .prog-line{background:var(--red)}
+.prog-step:last-child .prog-line{display:none}
+.prog-lbl{font-size:10px;color:var(--muted)}
+.prog-step.done .prog-lbl,.prog-step.now .prog-lbl{color:var(--light)}
+.vid-lnk{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px 15px;margin-bottom:7px}
+.vid-lnk a{color:var(--red);text-decoration:none;font-size:14px}
+.vid-lnk a:hover{text-decoration:underline}
+.bk-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:14px;transition:border-color .3s}
+.bk-card:hover{border-color:var(--border2)}
+.bk-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px}
+
+/* ── Footer ── */
+footer{background:var(--card);border-top:1px solid var(--border);padding:36px 24px;text-align:center}
+.f-logo{font-family:var(--fd);font-size:26px;letter-spacing:3px;margin-bottom:7px}
+.f-logo span{color:var(--red)}
+.f-sub{color:var(--muted);font-size:14px}
+
+/* ── Card section labels ── */
+.sec-lbl{font-size:12px;color:var(--red);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.sec-lbl span.num{color:var(--red)}
+.sec-lbl span.line{flex:1;height:1px;background:var(--border)}
+<p style="color:var(--muted);font-size:12px;margin-top:6px"><a href="bbshoots49@gmail.com">bbshoots49@gmail.com</a> · +91 6304828347</p>
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cur" id="cur"></div>
+<div class="cur-r" id="curR"></div>
+
+<!-- Toasts -->
+<div id="toasts"></div>
+
+<!-- ═══════════════════ NAV ═══════════════════ -->
+<nav id="mainNav">
+  <div class="nav-in">
+    <span class="nav-logo" onclick="goPage('home')">BB<span>SHOOTS</span></span>
+    <div class="nav-links" id="navLinks">
+      <button class="nav-btn" onclick="goSection('services')">Services</button>
+      <button class="nav-btn" onclick="goSection('about')">About</button>
+      <button class="nav-btn" onclick="goSection('contact')">Contact</button>
+      <button class="btn btn-out btn-sm" onclick="goPage('booking')">📅 Book Now</button>
+      <button class="btn btn-red btn-sm" id="navPortal" onclick="goPage('portal')">Client Portal</button>
+      <button class="btn btn-ghost btn-sm hidden" id="navLogout" onclick="doLogout()">⬅ Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════ HOME ═══════════════════ -->
+<div id="page-home" class="page active">
+
+  <!-- HERO -->
+  <section id="hero">
+    <span class="hero-float hf1">🎬</span>
+    <span class="hero-float hf2">📸</span>
+    <span class="hero-float hf3">🎥</span>
+    <span class="hero-float hf4">✨</span>
+    <div class="hero-cnt">
+      <div class="hero-tag">🎬 Premium Cinematic Productions</div>
+      <h1 class="hero-title">BB<span class="r">SHOOTS</span></h1>
+      <p class="hero-sub">Professional Photography &amp; Videography — Capturing your moments with cinematic excellence.</p>
+      <div class="hero-btns">
+        <button class="btn btn-red btn-lg" onclick="goPage('booking')">📅 Book a Session</button>
+        <button class="btn btn-out btn-lg" onclick="goSection('services')">Explore Services ↓</button>
+      </div>
+    </div>
+    <div class="scroll-ind"><div class="scroll-line"></div><span>Scroll</span></div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services" class="sec">
+    <div class="container">
+      <div class="sec-tag">What We Do</div>
+      <div class="sec-title">Our <span>Services</span></div>
+      <p class="sec-sub">Every moment deserves to be remembered forever. We cover it all.</p>
+      <div class="svc-grid">
+        <div class="svc-card reveal d1" onclick="goPage('booking')"><span class="svc-emoji">💒</span><div class="svc-name">Wedding Coverage</div><p class="svc-desc">Full-day cinematic wedding films and photography — every tear, laugh and dance captured.</p></div>
+        <div class="svc-card reveal d2" onclick="goPage('booking')"><span class="svc-emoji">🎓</span><div class="svc-name">College Festivals</div><p class="svc-desc">High-energy event coverage capturing the spirit and color of every campus celebration.</p></div>
+        <div class="svc-card reveal d3" onclick="goPage('booking')"><span class="svc-emoji">📱</span><div class="svc-name">Instagram Reels</div><p class="svc-desc">Scroll-stopping short-form content crafted for maximum social media engagement.</p></div>
+        <div class="svc-card reveal d4" onclick="goPage('booking')"><span class="svc-emoji">🎂</span><div class="svc-name">Birthday Parties</div><p class="svc-desc">Fun, vibrant and emotionally rich coverage making every birthday unforgettable.</p></div>
+        <div class="svc-card reveal d5" onclick="goPage('booking')"><span class="svc-emoji">🏢</span><div class="svc-name">Corporate Promos</div><p class="svc-desc">Professional brand films, product showcases and corporate event documentation.</p></div>
+        <div class="svc-card reveal d6" onclick="goPage('booking')"><span class="svc-emoji">🎉</span><div class="svc-name">Grand Openings</div><p class="svc-desc">Launch your business with stunning visual content that builds brand credibility.</p></div>
+        <div class="svc-card reveal d7" onclick="goPage('booking')"><span class="svc-emoji">👥</span><div class="svc-name">Group Events</div><p class="svc-desc">Team outings, reunions and community events covered beautifully from every angle.</p></div>
+        <div class="svc-card reveal d8" onclick="goPage('booking')"><span class="svc-emoji">📺</span><div class="svc-name">Advertisement Content</div><p class="svc-desc">Compelling ad campaigns that convert viewers into loyal customers.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="container" style="padding-bottom:80px">
+    <div class="cta-band reveal">
+      <div class="cta-title">Custom Requirements?<br><span>We've Got You!</span></div>
+      <p class="cta-sub">Have something unique in mind? We craft bespoke productions tailored exactly to your vision and budget.</p>
+      <button class="btn btn-red btn-lg" onclick="goPage('booking')">Discuss Your Project →</button>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <section id="about" class="sec" style="padding-top:0">
+    <div class="container">
+      <div class="about-grid">
+        <div class="reveal">
+          <div class="about-lbl">Who We Are</div>
+          <div class="about-title">About<br><span>BBShoots</span></div>
+          <p class="about-body">We are a premium visual storytelling studio dedicated to transforming your most important moments into cinematic masterpieces. From intimate gatherings to grand corporate productions, we bring professional expertise and creative passion to every frame.</p>
+          <p class="about-body" style="font-size:14px;color:var(--muted)">Our team uses cutting-edge equipment and post-production techniques to deliver content that genuinely stands out in the digital age.</p>
+          <div class="stats-row">
+            <div class="stat-it"><div class="stat-num">500+</div><div class="stat-lbl">Events Covered</div></div>
+            <div class="stat-it"><div class="stat-num">8</div><div class="stat-lbl">Service Types</div></div>
+            <div class="stat-it"><div class="stat-num">4K</div><div class="stat-lbl">Cinema Quality</div></div>
+            <div class="stat-it"><div class="stat-num">100%</div><div class="stat-lbl">Satisfaction</div></div>
+          </div>
+        </div>
+        <div class="about-visual reveal"><span class="about-emoji">🎬</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="sec" style="padding-top:0">
+    <div class="container">
+      <div class="sec-tag">Connect With Us</div>
+      <div class="sec-title">Get In <span>Touch</span></div>
+      <p class="sec-sub">Ready to create something extraordinary? We'd love to hear from you.</p>
+      <div class="contact-grid">
+        <div class="reveal">
+          <div class="ci"><div class="ci-icon">📧</div><div><div class="ci-lbl">Email</div><div class="ci-val"><a href="bbshoots49@gmail.com">bbshoots49@gmail.com</a></div></div></div>
+          <div class="ci"><div class="ci-icon">📞</div><div><div class="ci-lbl">Phone</div><div class="ci-val">+91 6304828347</div></div></div>
+          <div class="ci"><div class="ci-icon">📍</div><div><div class="ci-lbl">Location</div><div class="ci-val">NarasaraoPet, Andhra Pradesh</div></div></div>
+          <div class="ci"><div class="ci-icon">📸</div><div><div class="ci-lbl">Instagram</div><div class="ci-val">@bbshoots_official</div></div></div>
+          <button class="btn btn-out btn-sm" onclick="openWhatsApp()">📲 Message on WhatsApp</button>
+          <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-top:18px">We respond within 24 hours. Available Mon–Sun, 6 AM–9 PM IST.</p>
+        </div>
+        <div class="card reveal d2">
+          <div style="font-weight:700;font-size:18px;margin-bottom:22px">📩 Quick Message</div>
+          <div class="fg"><label>Your Name</label><input id="cName" placeholder="Enter Your Name"></div>
+          <div class="fg"><label>Email Address</label><input type="email" id="cEmail" placeholder="yourmail@example.com"></div>
+          <div class="fg"><label>Message</label><textarea id="cMsg" rows="4" placeholder="Tell us about your project or ask any question..."></textarea></div>
+          <button class="btn btn-red btn-full" id="cSendBtn" onclick="sendContact()">Send Message 📨</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="f-logo">BB<span>SHOOTS</span></div>
+    <p class="f-sub">© 2026 BBShoots Productions · NarasaraoPet, Andhra Pradesh</p>
+    <p style="color:var(--muted);font-size:12px;margin-top:6px"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0e6c6c7d6661617a7d3a374e69636f6762206d6163">bbshoots49@gmail.com</a> · +91 6304828347</p>
+  </footer>
+</div>
+
+<!-- ═══════════════════ BOOKING ═══════════════════ -->
+<div id="page-booking" class="page" style="padding-top:90px">
+  <div class="container">
+    <div class="bk-wrap">
+      <button class="btn btn-ghost btn-sm" onclick="goPage('home')" style="margin-bottom:26px">← Back to Home</button>
+
+      <!-- CONFIRMATION -->
+      <div id="bkConfirm" class="hidden">
+        <div class="bk-confirm">
+          <div class="bk-icon">✅</div>
+          <div style="font-family:var(--fd);font-size:40px;letter-spacing:2px;margin-bottom:8px">Booking <span style="color:var(--red)">Submitted!</span></div>
+          <p style="color:var(--light);font-size:16px;margin-bottom:6px">Thank you! Your request has been received.</p>
+          <p style="color:var(--muted);font-size:14px">Reference: <strong id="bkRef" style="color:var(--red);font-size:17px"></strong></p>
+          <p style="color:var(--muted);font-size:13px;margin-top:6px">📧 A confirmation email has been sent to your inbox.</p>
+
+          <!-- OFFLINE PAYMENT INFO -->
+          <div class="pay-info">
+            <h4>💳 Payment Information</h4>
+            <p>Your booking is confirmed. Please pay via <strong style="color:var(--gold)">bank transfer or cash at the event</strong>.<br>
+            Our team will contact you within 24 hours with full payment details and to confirm your slot.</p>
+            <div class="pay-bank">
+              <p>
+                <strong style="color:var(--text)">Bank Transfer Details:</strong><br>
+                Account Name: <strong>BBShoots Productions</strong><br>
+                Bank: HDFC Bank &nbsp;|&nbsp; IFSC: HDFC0001234<br>
+                Account No: <strong>5020 XXXX XXXX 1234</strong><br>
+                UPI ID: <strong>bbshoots@hdfc</strong>
+              </p>
+            </div>
+            <p style="margin-top:12px;color:var(--muted);font-size:13px">⚠️ Please mention your booking reference number in the payment description.</p>
+          </div>
+
+          <div style="display:flex;gap:13px;justify-content:center;margin-top:28px;flex-wrap:wrap">
+            <button class="btn btn-ghost" onclick="resetBooking()">Book Another Session</button>
+            <button class="btn btn-red" onclick="goPage('portal')">View in Portal →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORM -->
+      <div id="bkForm">
+        <div style="font-family:var(--fd);font-size:42px;letter-spacing:2px;margin-bottom:6px">Book a <span style="color:var(--red)">Session</span></div>
+        <p style="color:var(--muted);margin-bottom:34px">Fill in the details below. We'll confirm within 24 hours.</p>
+
+        <!-- Client info -->
+        <div class="card" style="margin-bottom:18px">
+          <div class="sec-lbl"><span class="num">01</span><span class="line"></span>Client Information</div>
+          <div class="grid2">
+            <div class="fg"><label>Full Name *</label><input id="bName" placeholder="Your full name"></div>
+            <div class="fg"><label>Email Address *</label><input type="email" id="bEmail" placeholder="your@email.com"></div>
+          </div>
+          <div class="fg"><label>Phone Number *</label><input id="bPhone" placeholder="+91 XXXXX XXXXX" maxlength="15"></div>
+        </div>
+
+        <!-- Event details -->
+        <div class="card" style="margin-bottom:18px">
+          <div class="sec-lbl"><span class="num">02</span><span class="line"></span>Event Details</div>
+          <div class="grid2">
+            <div class="fg">
+              <label>Event Type *</label>
+              <select id="bEvType" onchange="toggleCustom()">
+                <option value="">— Select event type —</option>
+                <option value="Wedding">💒 Wedding</option>
+                <option value="College Festival">🎓 College Festival</option>
+                <option value="Instagram Reels">📱 Instagram Reels</option>
+                <option value="Birthday Party">🎂 Birthday Party</option>
+                <option value="Corporate Promo">🏢 Corporate Promo</option>
+                <option value="Grand Opening">🎉 Grand Opening</option>
+                <option value="Group Event">👥 Group Event</option>
+                <option value="Advertisement">📺 Advertisement</option>
+                <option value="Custom">✨ Custom — Type Below</option>
+              </select>
+            </div>
+            <div class="fg"><label>Event Date *</label><input type="date" id="bDate"></div>
+          </div>
+
+          <!-- Custom event input -->
+          <div id="customWrap" class="fg hidden">
+            <label>Describe Your Custom Event *</label>
+            <input id="customInput" placeholder="e.g. Pre-wedding shoot at Araku Valley, product launch...">
+            <div class="fhint">Describe what you have in mind so we can plan the perfect shoot.</div>
+          </div>
+
+          <div class="fg"><label>Event Location *</label><input id="bLoc" placeholder="Venue name, city or address"></div>
+
+          <label style="margin-bottom:13px">Package *</label>
+          <div class="pkg-grid">
+            <div class="pkg" data-pkg="Basic" onclick="selPkg(this)">
+              <div class="pkg-chk">✓</div>
+              <div style="font-size:28px;margin-bottom:10px">📸</div>
+              <div class="pkg-name">Basic</div>
+              <div class="pkg-desc">Photography only — great for smaller events</div>
+            </div>
+            <div class="pkg" data-pkg="Standard" onclick="selPkg(this)">
+              <div class="pkg-chk">✓</div>
+              <div style="font-size:28px;margin-bottom:10px">🎬</div>
+              <div class="pkg-name">Standard</div>
+              <div class="pkg-desc">Photo + Video — our most popular package</div>
+            </div>
+            <div class="pkg" data-pkg="Premium" onclick="selPkg(this)">
+              <div class="pkg-chk">✓</div>
+              <div style="font-size:28px;margin-bottom:10px">🏆</div>
+              <div class="pkg-name">Premium</div>
+              <div class="pkg-desc">Full cinematic experience — the complete package</div>
+            </div>
+          </div>
+          <input type="hidden" id="bPkg">
+
+          <div class="fg" style="margin-top:18px"><label>Additional Notes</label><textarea id="bNotes" rows="4" placeholder="Special requirements, themes, color preferences, guest count..."></textarea></div>
+        </div>
+
+        <button class="btn btn-red btn-full btn-lg" id="bSubmitBtn" onclick="submitBooking()">🎬 Submit Booking Request</button>
+        <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:11px">You'll receive a confirmation email within minutes</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PORTAL ═══════════════════ -->
+<div id="page-portal" class="page" style="padding-top:90px">
+  <div class="container">
+
+    <!-- AUTH -->
+    <div id="portalAuth" class="auth-wrap">
+      <button class="btn btn-ghost btn-sm" onclick="goPage('home')" style="margin-bottom:26px">← Back to Home</button>
+      <div class="card">
+        <div style="font-family:var(--fd);font-size:32px;letter-spacing:2px;margin-bottom:6px">Client <span style="color:var(--red)">Portal</span></div>
+        <p style="color:var(--muted);font-size:14px;margin-bottom:26px">Access your bookings, project status and video downloads.</p>
+        <div class="auth-tabs">
+          <button class="auth-tab on" id="tabLogin" onclick="authTab('login')">Login</button>
+          <button class="auth-tab" id="tabReg" onclick="authTab('register')">Register</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="formLogin">
+          <div class="fg"><label>Email</label><input type="email" id="lEmail" placeholder="your@email.com"></div>
+          <div class="fg"><label>Password</label><input type="password" id="lPass" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+          <button class="btn btn-red btn-full" id="loginBtn" onclick="doLogin()">Login →</button>
+          <button onclick="authTab('forgot')" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-top:13px;font-family:var(--fb)">Forgot password?</button>
+        </div>
+
+        <!-- REGISTER -->
+        <div id="formReg" class="hidden">
+          <div class="fg"><label>Full Name</label><input id="rName" placeholder="Your name"></div>
+          <div class="fg"><label>Email</label><input type="email" id="rEmail" placeholder="your@email.com"></div>
+          <div class="fg"><label>Phone</label><input id="rPhone" placeholder="+91 XXXXX XXXXX"></div>
+          <div class="fg"><label>Password</label><input type="password" id="rPass" placeholder="Create a password (min 6 chars)"></div>
+          <div class="fg"><label>Confirm Password</label><input type="password" id="rPass2" placeholder="Confirm password" onkeydown="if(event.key==='Enter')doRegister()"></div>
+          <button class="btn btn-red btn-full" id="regBtn" onclick="doRegister()">Create Account →</button>
+        </div>
+
+        <!-- FORGOT -->
+        <div id="formForgot" class="hidden">
+          <p style="color:var(--muted);font-size:14px;margin-bottom:18px">Enter your email and we'll send password reset instructions.</p>
+          <div class="fg"><label>Email</label><input type="email" id="fEmail" placeholder="your@email.com"></div>
+          <button class="btn btn-red btn-full" onclick="doForgot()">Send Reset Link</button>
+          <button onclick="authTab('login')" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-top:13px;font-family:var(--fb)">← Back to Login</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="portalDash" class="hidden portal-wrap">
+      <div class="portal-hdr">
+        <div>
+          <div style="font-family:var(--fd);font-size:36px;letter-spacing:2px">My <span style="color:var(--red)">Dashboard</span></div>
+          <p style="color:var(--muted)">Welcome back, <span id="dashName" style="color:var(--light);font-weight:600"></span> 👋</p>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-red" onclick="goPage('booking')">+ New Booking</button>
+          <button class="btn btn-ghost btn-sm" onclick="doLogout()">⬅ Logout</button>
+        </div>
+      </div>
+      <div id="myBookings"></div>
+    </div>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════════════
+// API PATH — auto-detects, works on any folder name
+// ═══════════════════════════════════════════════
+const API_BASE = (function() {
+  const parts = window.location.pathname.split('/');
+  // find index of folder (e.g. 'bbshoots') — it's whatever is after the first /
+  const base = window.location.origin + '/' + (parts[1] || 'bbshoots');
+  return base + '/api/index.php';
+})();
+
+// ── State ─────────────────────────────────────
+let currentUser = null;
+let selectedPkg = '';
+
+// ── API helper ────────────────────────────────
+async function api(action, data) {
+  try {
+    const url = API_BASE + '?action=' + encodeURIComponent(action);
+    const opts = {
+      method: data ? 'POST' : 'GET',
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      credentials: 'same-origin'
+    };
+    if (data) opts.body = JSON.stringify(data);
+    const r = await fetch(url, opts);
+    const text = await r.text();
+    try { return JSON.parse(text); }
+    catch(e) {
+      console.error('API non-JSON [' + action + ']:', text.substring(0, 400));
+      return { success: false, error: 'Server returned non-JSON. Check PHP & database are running in XAMPP.' };
+    }
+  } catch(e) {
+    console.error('API fetch error:', e);
+    return { success: false, error: 'Cannot reach server. Make sure Apache is running in XAMPP.' };
+  }
+}
+
+// ── Toast ─────────────────────────────────────
+function toast(msg, type, dur) {
+  type = type || 'ok'; dur = dur || 3500;
+  const wrap = document.getElementById('toasts');
+  const icons = { ok: '✅', err: '❌', info: 'ℹ️' };
+  const d = document.createElement('div');
+  d.className = 'toast toast-' + type;
+  d.innerHTML = '<span>' + (icons[type] || '•') + '</span><span>' + msg + '</span>';
+  wrap.appendChild(d);
+  setTimeout(function() { d.style.opacity = '0'; d.style.transition = '.3s'; setTimeout(function() { d.remove(); }, 300); }, dur);
+}
+
+// ── Page routing ──────────────────────────────
+function goPage(pg) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  var el = document.getElementById('page-' + pg);
+  if (el) el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (pg === 'portal') initPortal();
+  if (pg === 'booking') setMinDate();
+}
+
+function goSection(id) {
+  goPage('home');
+  setTimeout(function() {
+    var el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 120);
+}
+
+// ── Nav scroll ────────────────────────────────
+window.addEventListener('scroll', function() {
+  var nav = document.getElementById('mainNav');
+  if (nav) nav.classList.toggle('scrolled', window.scrollY > 30);
+});
+
+// ── Custom cursor ─────────────────────────────
+(function() {
+  if (window.innerWidth <= 768) return;
+  var c = document.getElementById('cur');
+  var r = document.getElementById('curR');
+  if (!c || !r) return;
+  var rx = 0, ry = 0, cx = 0, cy = 0;
+  document.addEventListener('mousemove', function(e) {
+    cx = e.clientX; cy = e.clientY;
+    c.style.left = (cx - 5) + 'px';
+    c.style.top  = (cy - 5) + 'px';
+  });
+  (function loop() {
+    rx += (cx - rx) * 0.12;
+    ry += (cy - ry) * 0.12;
+    r.style.left = (rx - 17) + 'px';
+    r.style.top  = (ry - 17) + 'px';
+    requestAnimationFrame(loop);
+  })();
+  document.addEventListener('mouseover', function(e) {
+    if (e.target.closest && e.target.closest('button,a,.svc-card,.pkg'))
+      r.classList.add('big');
+    else r.classList.remove('big');
+  });
+})();
+
+// ── Scroll reveal ─────────────────────────────
+var revObs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) { e.target.classList.add('vis'); revObs.unobserve(e.target); }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(function(el) { revObs.observe(el); });
+
+// ── Check existing session on load ────────────
+(async function() {
+  var r = await api('check_session');
+  if (r.success && r.data && r.data.client) {
+    currentUser = r.data.client;
+    updateNavUser();
+  }
+})();
+
+function updateNavUser() {
+  var portal = document.getElementById('navPortal');
+  var logout = document.getElementById('navLogout');
+  if (currentUser) {
+    portal.textContent = '👤 ' + currentUser.name.split(' ')[0];
+    logout.classList.remove('hidden');
+  } else {
+    portal.textContent = 'Client Portal';
+    logout.classList.add('hidden');
+  }
+}
+
+async function doLogout() {
+  await api('client_logout');
+  currentUser = null;
+  updateNavUser();
+  document.getElementById('portalAuth').style.display = '';
+  document.getElementById('portalDash').classList.add('hidden');
+  goPage('home');
+  toast('Logged out.', 'info');
+}
+
+// ══════════════════════════════════════════════
+// BOOKING
+// ══════════════════════════════════════════════
+function setMinDate() {
+  var d = document.getElementById('bDate');
+  if (d) {
+    var t = new Date();
+    t.setDate(t.getDate() + 1);
+    d.min = t.toISOString().split('T')[0];
+  }
+}
+
+function toggleCustom() {
+  var val  = document.getElementById('bEvType').value;
+  var wrap = document.getElementById('customWrap');
+  if (val === 'Custom') {
+    wrap.classList.remove('hidden');
+    document.getElementById('customInput').focus();
+  } else {
+    wrap.classList.add('hidden');
+  }
+}
+
+function selPkg(card) {
+  document.querySelectorAll('.pkg').forEach(function(c) { c.classList.remove('sel'); });
+  card.classList.add('sel');
+  selectedPkg = card.getAttribute('data-pkg');
+  document.getElementById('bPkg').value = selectedPkg;
+}
+
+async function submitBooking() {
+  var evType = document.getElementById('bEvType').value;
+  var custom = document.getElementById('customInput').value.trim();
+  var finalEv = (evType === 'Custom') ? custom : evType;
+
+  var payload = {
+    client_name: document.getElementById('bName').value.trim(),
+    email:       document.getElementById('bEmail').value.trim(),
+    phone:       document.getElementById('bPhone').value.trim(),
+    event_type:  finalEv,
+    event_date:  document.getElementById('bDate').value,
+    location:    document.getElementById('bLoc').value.trim(),
+    package:     selectedPkg,
+    notes:       document.getElementById('bNotes').value.trim()
+  };
+
+  if (!payload.client_name)        return toast('Please enter your name.', 'err');
+  if (!payload.email || !payload.email.includes('@')) return toast('Please enter a valid email.', 'err');
+  if (!payload.phone)               return toast('Please enter your phone number.', 'err');
+  if (!payload.event_type)          return toast('Please select an event type.', 'err');
+  if (evType === 'Custom' && !custom) return toast('Please describe your custom event.', 'err');
+  if (!payload.event_date)          return toast('Please select an event date.', 'err');
+  if (!payload.location)            return toast('Please enter the event location.', 'err');
+  if (!payload.package)             return toast('Please select a package (Basic / Standard / Premium).', 'err');
+
+  var btn = document.getElementById('bSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  var res = await api('create_booking', payload);
+
+  btn.disabled = false;
+  btn.textContent = '🎬 Submit Booking Request';
+
+  if (res.success) {
+    document.getElementById('bkRef').textContent = res.data.booking_ref;
+    document.getElementById('bkForm').classList.add('hidden');
+    document.getElementById('bkConfirm').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toast('Booking submitted! 🎬', 'ok');
+  } else {
+    toast(res.error || 'Booking failed. Please try again.', 'err');
+  }
+}
+
+function resetBooking() {
+  document.getElementById('bkForm').classList.remove('hidden');
+  document.getElementById('bkConfirm').classList.add('hidden');
+  ['bName','bEmail','bPhone','bDate','bLoc','bNotes','customInput'].forEach(function(id) {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('bEvType').value = '';
+  document.getElementById('customWrap').classList.add('hidden');
+  document.querySelectorAll('.pkg').forEach(function(c) { c.classList.remove('sel'); });
+  selectedPkg = '';
+}
+
+// ══════════════════════════════════════════════
+// CONTACT
+// ══════════════════════════════════════════════
+async function sendContact() {
+  var name  = document.getElementById('cName').value.trim();
+  var email = document.getElementById('cEmail').value.trim();
+  var msg   = document.getElementById('cMsg').value.trim();
+
+  if (!name || !email || !msg) return toast('Please fill all fields.', 'err');
+  if (!email.includes('@'))    return toast('Please enter a valid email.', 'err');
+
+  var btn = document.getElementById('cSendBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  var res = await api('send_contact', { name: name, email: email, message: msg });
+
+  btn.disabled = false;
+  btn.textContent = 'Send Message 📨';
+
+  if (res.success) {
+    toast("Message sent! We'll get back to you soon.", 'ok');
+    document.getElementById('cName').value  = '';
+    document.getElementById('cEmail').value = '';
+    document.getElementById('cMsg').value   = '';
+  } else {
+    toast(res.error || 'Failed to send. Please try again.', 'err');
+  }
+}
+
+// ══════════════════════════════════════════════
+// PORTAL — AUTH
+// ══════════════════════════════════════════════
+function authTab(tab) {
+  document.getElementById('formLogin').classList.add('hidden');
+  document.getElementById('formReg').classList.add('hidden');
+  document.getElementById('formForgot').classList.add('hidden');
+  document.getElementById('tabLogin').classList.remove('on');
+  document.getElementById('tabReg').classList.remove('on');
+  if (tab === 'login')    { document.getElementById('formLogin').classList.remove('hidden');  document.getElementById('tabLogin').classList.add('on'); }
+  if (tab === 'register') { document.getElementById('formReg').classList.remove('hidden');    document.getElementById('tabReg').classList.add('on'); }
+  if (tab === 'forgot')   { document.getElementById('formForgot').classList.remove('hidden'); }
+}
+
+async function doLogin() {
+  var email = document.getElementById('lEmail').value.trim();
+  var pass  = document.getElementById('lPass').value;
+  if (!email || !pass) return toast('Enter email and password.', 'err');
+
+  var btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Logging in...';
+
+  var res = await api('client_login', { email: email, password: pass });
+  btn.disabled = false; btn.textContent = 'Login →';
+
+  if (res.success) {
+    currentUser = res.data;
+    updateNavUser();
+    showDash();
+    toast('Welcome back, ' + res.data.name + '!', 'ok');
+  } else {
+    toast(res.error || 'Login failed.', 'err');
+  }
+}
+
+async function doRegister() {
+  var name  = document.getElementById('rName').value.trim();
+  var email = document.getElementById('rEmail').value.trim();
+  var phone = document.getElementById('rPhone').value.trim();
+  var pass  = document.getElementById('rPass').value;
+  var pass2 = document.getElementById('rPass2').value;
+
+  if (!name || !email || !phone || !pass) return toast('Please fill all fields.', 'err');
+  if (pass !== pass2)   return toast('Passwords do not match.', 'err');
+  if (pass.length < 6)  return toast('Password must be at least 6 characters.', 'err');
+
+  var btn = document.getElementById('regBtn');
+  btn.disabled = true; btn.textContent = 'Creating...';
+
+  var res = await api('client_register', { name: name, email: email, phone: phone, password: pass });
+  btn.disabled = false; btn.textContent = 'Create Account →';
+
+  if (res.success) {
+    currentUser = res.data;
+    updateNavUser();
+    showDash();
+    toast('Account created! Welcome to BBShoots 🎬', 'ok');
+  } else {
+    toast(res.error || 'Registration failed.', 'err');
+  }
+}
+
+async function doForgot() {
+  var email = document.getElementById('fEmail').value.trim();
+  if (!email) return toast('Enter your email address.', 'err');
+  toast('Reset instructions sent to ' + email, 'info');
+  authTab('login');
+}
+
+// ══════════════════════════════════════════════
+// PORTAL — DASHBOARD
+// ══════════════════════════════════════════════
+function initPortal() {
+  if (currentUser) showDash();
+  else {
+    document.getElementById('portalAuth').style.display = '';
+    document.getElementById('portalDash').classList.add('hidden');
+  }
+}
+
+function showDash() {
+  document.getElementById('portalAuth').style.display = 'none';
+  document.getElementById('portalDash').classList.remove('hidden');
+  document.getElementById('dashName').textContent = currentUser.name;
+  loadMyBookings();
+}
+
+async function loadMyBookings() {
+  var wrap = document.getElementById('myBookings');
+  wrap.innerHTML = '<p style="color:var(--muted);padding:32px;text-align:center">Loading your bookings...</p>';
+
+  var res = await api('get_my_bookings');
+  if (!res.success) {
+    wrap.innerHTML = '<p style="color:var(--red);padding:20px">' + res.error + '</p>';
+    return;
+  }
+
+  var bks = res.data;
+  if (!bks.length) {
+    wrap.innerHTML = '<div class="card" style="text-align:center;padding:56px">' +
+      '<div style="font-size:52px;margin-bottom:14px">📋</div>' +
+      '<div style="font-size:18px;font-weight:600;margin-bottom:8px">No bookings yet</div>' +
+      '<p style="color:var(--muted);margin-bottom:22px">Book your first session with BBShoots</p>' +
+      '<button class="btn btn-red" onclick="goPage(\'booking\')">+ Book a Session</button>' +
+      '</div>';
+    return;
+  }
+
+  var steps = ['scheduled','shooting','editing','review','completed'];
+  var html = '';
+
+  bks.forEach(function(b) {
+    var ps = b.project_status || 'scheduled';
+    var pi = steps.indexOf(ps);
+    var dots = '';
+    steps.forEach(function(s, i) {
+      var cls = (i < pi ? 'done' : '') + ' ' + (i === pi ? 'now' : '');
+      var line = (i < steps.length - 1) ? '<div class="prog-line"></div>' : '';
+      dots += '<div class="prog-step ' + cls + '">' +
+        '<div class="prog-dot"></div>' + line +
+        '<div class="prog-lbl">' + s.charAt(0).toUpperCase() + s.slice(1) + '</div>' +
+        '</div>';
+    });
+
+    var videos = '';
+    var urls = b.video_urls || [];
+    urls.forEach(function(u, i) {
+      videos += '<div class="vid-lnk"><span>🎬</span>' +
+        '<a href="' + u + '" target="_blank">Video ' + (i+1) + ' — Click to Download</a></div>';
+    });
+
+    html += '<div class="bk-card">' +
+      '<div class="bk-top">' +
+        '<div>' +
+          '<div style="font-weight:700;font-size:17px">' + b.event_type + '</div>' +
+          '<div style="color:var(--muted);font-size:13px;margin-top:4px">' +
+            '📅 ' + fmtDate(b.event_date) + ' &nbsp;·&nbsp; 📍 ' + b.location + ' &nbsp;·&nbsp; 📦 ' + b.package +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:7px;flex-wrap:wrap">' +
+          '<span class="badge b-' + b.status + '">' + b.status + '</span>' +
+          (ps ? '<span class="badge b-' + ps + '">' + ps + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="prog-track">' +
+        '<div style="font-size:11px;color:var(--muted);margin-bottom:10px">Project Progress</div>' +
+        '<div class="prog-steps">' + dots + '</div>' +
+      '</div>' +
+      videos +
+      '<div style="font-size:12px;color:var(--muted);margin-top:12px">' +
+        'Ref: <strong style="color:var(--light)">' + b.booking_ref + '</strong>' +
+        ' &nbsp;·&nbsp; Submitted: ' + fmtDate(b.created_at) +
+      '</div>' +
+      '</div>';
+  });
+
+  wrap.innerHTML = html;
+}
+
+function fmtDate(s) {
+  if (!s) return '—';
+  try { return new Date(s).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  catch(e) { return s; }
+}
+// ── WhatsApp ─────────────────────────────────────
+const ADMIN_WHATSAPP = '916304828347'; // your WhatsApp number with country code // Change this number in VSCode (include country code without + or spaces)
+function openWhatsApp() {
+  const url = `https://wa.me/${ADMIN_WHATSAPP}`;
+  window.open(url, '_blank');
+}
+</script>
+</body>
+</html>
